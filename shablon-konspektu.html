@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>[Тема] · Конспект</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&family=Playfair+Display:ital,wght@1,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false})"></script>
+<style>
+:root{--night:#081F44;--deep:#143660;--dive:#1F3F74;--sail:#4569AD;--lilac:#B9C8E6;--pink:#E679A6;--pink-ink:#B23E72;--pink-bg:#FCEFF5;--green:#587954;--green-bg:#EEF4EC;--blue-bg:#EDF2FB;--amber:#A44A0B;--amber-bg:#FFF5E8;--paper:#F5F7FB;--card:#FFFFFF;--ink:#13284A;--muted:#4A5D7E;--line:#DCE3EF;--fs:18px}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;font-size:var(--fs)}
+body{margin:0;font-family:Inter,system-ui,sans-serif;font-size:1rem;line-height:1.7;color:var(--ink);background:var(--paper);-webkit-font-smoothing:antialiased}
+a{color:var(--sail)}
+:focus-visible{outline:3px solid var(--pink);outline-offset:3px;border-radius:6px}
+.skip{position:absolute;left:-999px;top:8px;z-index:30;background:var(--night);color:#fff;padding:8px 14px;border-radius:8px}
+.skip:focus{left:8px}
+.hero{position:relative;overflow:hidden;color:#fff;padding:56px 20px 76px;background:radial-gradient(120% 140% at 85% 0%,var(--dive) 0%,var(--deep) 45%,var(--night) 100%)}
+.hero::after{content:"";position:absolute;left:-10%;right:-10%;bottom:-46px;height:92px;background:var(--paper);border-radius:50% 50% 0 0/100% 100% 0 0}
+.hero-in,.page{max-width:780px;margin:0 auto}
+.eyebrow{display:inline-block;padding:6px 12px;border-radius:999px;background:var(--lilac);color:var(--night);font:700 .72rem Manrope,sans-serif;letter-spacing:.14em;text-transform:uppercase}
+h1,h2,h3{margin:0;font-family:Manrope,sans-serif;line-height:1.2;letter-spacing:-.015em;color:var(--night)}
+.hero h1{margin:16px 0 14px;color:#fff;font-size:clamp(2rem,6vw,3.1rem)}
+.hero h1 em{font-family:"Playfair Display",Georgia,serif;font-style:italic;font-weight:500;color:#F6B3CF}
+.lead{margin:0;max-width:62ch;font-size:1.1rem;color:#E3EAF7}
+.page{padding:8px 20px 96px}
+.toc{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 28px}
+.toc a{padding:7px 13px;border-radius:999px;background:var(--card);border:1px solid var(--line);color:var(--ink);font-size:.82rem;font-weight:500;text-decoration:none}
+.toc a:hover{border-color:var(--pink);color:var(--pink-ink)}
+.card{margin:0 0 24px;padding:30px 32px;background:var(--card);border:1px solid var(--line);border-radius:22px;box-shadow:0 1px 2px rgba(8,31,68,.04),0 8px 24px rgba(8,31,68,.06);scroll-margin-top:16px}
+.card h2{display:flex;align-items:center;gap:12px;margin-bottom:16px;font-size:1.5rem}
+.num{flex:none;display:inline-grid;place-items:center;min-width:2.3rem;height:2.3rem;padding:0 8px;border-radius:12px;background:var(--pink-bg);color:var(--pink-ink);font:800 .9rem Manrope,sans-serif}
+.card h3{margin:28px 0 10px;padding-left:12px;border-left:4px solid var(--green);font-size:1.12rem}
+p{margin:0 0 14px;max-width:68ch}
+ul,ol{margin:0 0 14px;padding-left:1.3em}
+li{margin:4px 0}
+li::marker{color:var(--pink-ink)}
+strong{color:var(--night)}
+.formula{margin:20px 0 8px;padding:18px 20px;overflow-x:auto;text-align:center;font-size:1.15rem;background:var(--blue-bg);border:1px solid #CFDAF0;border-radius:16px}
+.where{margin-bottom:18px;font-size:.92rem;color:var(--muted)}
+.callout{position:relative;margin:20px 0;padding:16px 18px 16px 56px;border:1px solid;border-left-width:5px;border-radius:16px}
+.callout::before{position:absolute;left:18px;top:16px;font-size:1.2rem;line-height:1}
+.callout b:first-child{display:block;margin-bottom:4px;font-family:Manrope,sans-serif;font-size:.95rem}
+.callout.remember{background:var(--green-bg);border-color:#CFE0CB;border-left-color:var(--green)}
+.callout.remember::before{content:"📌"}
+.callout.remember b:first-child{color:var(--green)}
+.callout.info{background:var(--blue-bg);border-color:#D3DEF2;border-left-color:var(--sail)}
+.callout.info::before{content:"🧭"}
+.callout.info b:first-child{color:var(--sail)}
+.callout.fact{background:var(--pink-bg);border-color:#F5D3E2;border-left-color:var(--pink)}
+.callout.fact::before{content:"💡"}
+.callout.fact b:first-child{color:var(--pink-ink)}
+.callout.warn{background:var(--amber-bg);border-color:#F3DABA;border-left-color:var(--amber)}
+.callout.warn::before{content:"⚠️"}
+.callout.warn b:first-child{color:var(--amber)}
+table{width:100%;margin:18px 0;border-collapse:separate;border-spacing:0;font-size:.95rem;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+th,td{padding:12px 14px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+tr:last-child td{border-bottom:0}
+th{background:#E9EEF8;color:var(--night);font:700 .78rem Manrope,sans-serif;letter-spacing:.06em;text-transform:uppercase}
+tr:nth-child(even) td{background:#FAFBFE}
+dl.terms{display:grid;gap:4px;margin:0}
+dl.terms dt{margin-top:8px;color:var(--green);font:700 1.02rem Manrope,sans-serif}
+dl.terms dd{margin:0;padding-bottom:12px;border-bottom:1px dashed var(--line)}
+dl.terms dd:last-child{border-bottom:0}
+.q{margin:18px 0;padding:18px;background:#FBFCFE;border:1px solid var(--line);border-radius:16px}
+.q>p:first-child{margin-bottom:12px;font-weight:600}
+.options{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.options li{margin:0;padding:10px 14px;background:var(--card);border:1px solid var(--line);border-radius:12px}
+details{margin:14px 0;background:var(--green-bg);border:1px solid #CFE0CB;border-radius:14px}
+summary{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 18px;color:var(--green);font-weight:700;cursor:pointer;list-style:none}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"Показати";flex:none;padding:4px 10px;border-radius:999px;background:var(--green);color:#fff;font-size:.75rem;font-weight:600}
+details[open] summary::after{content:"Сховати"}
+details>div{padding:0 18px 16px;color:var(--ink)}
+.gap{display:inline-block;min-width:110px;margin:0 4px;border-bottom:2px dashed var(--pink)}
+main svg{display:block;max-width:100%;height:auto;margin:18px auto}
+footer{margin-top:40px;text-align:center;font-size:.85rem;color:var(--muted)}
+.tools{position:fixed;right:18px;bottom:18px;z-index:20;display:flex;flex-direction:column;gap:10px}
+.tools button{display:grid;padding:0;place-items:center;width:52px;height:52px;border:0;border-radius:50%;background:var(--night);color:#fff;font:800 .95rem Manrope,sans-serif;cursor:pointer;box-shadow:0 8px 22px rgba(8,31,68,.28);transition:transform .15s,background .2s,opacity .25s}
+.tools button:hover{background:var(--sail);transform:translateY(-2px)}
+.tools .print{background:var(--pink-ink)}
+.tools .print:hover{background:var(--pink)}
+.tools .up{opacity:0;pointer-events:none}
+.tools .up.show{opacity:1;pointer-events:auto}
+@media (max-width:600px){:root{--fs:17px}.hero{padding:40px 16px 64px}.page{padding:4px 14px 96px}.card{padding:22px 18px;border-radius:18px}.card h2{font-size:1.3rem}table{display:block;overflow-x:auto}.tools{right:12px;bottom:12px}.tools button{width:46px;height:46px}}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+@media print{html{font-size:11.5pt!important}body{background:#fff}.hero{padding:0 0 10px;background:none;color:var(--night)}.hero::after,.tools,.toc,.skip{display:none}.hero h1{color:var(--night)}.hero h1 em{color:var(--pink-ink)}.eyebrow{border:1px solid var(--lilac);background:none}.lead{color:var(--muted)}.page{padding:0}.card{padding:14px 16px;box-shadow:none;border-color:#C9D3E5}.q,.callout,.formula,table,details,main svg,h2,h3{break-inside:avoid}h2,h3{break-after:avoid}@page{margin:14mm}.q{padding:10px 12px}.options{gap:4px}.options li{padding:4px 10px}summary::after{display:none}a{color:inherit}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">До змісту</a>
+<header class="hero"><div class="hero-in">
+<span class="eyebrow">[Предмет · Клас]</span>
+<h1>[Тема] <em>[2–3 слова-акцент]</em></h1>
+<p class="lead">[Головна ідея одним-двома реченнями]</p>
+</div></header>
+<main class="page" id="main">
+<nav class="toc" aria-label="Зміст"></nav>
+
+<!-- ЗРАЗОК КОМПОНЕНТІВ — заміни реальним змістом, стилі не чіпай -->
+<section class="card">
+<h2><span class="num">01</span>Назва розділу</h2>
+<p>Звичайний текст розділу. <strong>Ключове слово</strong> виділяється жирним.</p>
+<h3>Підзаголовок</h3>
+<div class="formula">$$d = \frac{V}{S}$$</div>
+<p class="where">де $d$ — діаметр молекули (м); $V$ — об'єм краплі (м³); $S$ — площа плями (м²).</p>
+<div class="callout remember"><b>Запам'ятай</b>Головна думка або визначення.</div>
+<div class="callout info"><b>Довідка</b>Пояснення поняття або приклад розв'язання.</div>
+<div class="callout fact"><b>Цікавий факт</b>Маловідома деталь.</div>
+<div class="callout warn"><b>Типова помилка</b>Що учні часто плутають і як правильно.</div>
+<table>
+<tr><th>Величина</th><th>Позначення</th><th>Одиниця СІ</th></tr>
+<tr><td>Діаметр</td><td>$d$</td><td>м</td></tr>
+</table>
+<dl class="terms"><dt>Термін</dt><dd>Пояснення простими словами.</dd></dl>
+<div class="q">
+<p><strong>1.</strong> Питання тесту?</p>
+<ul class="options"><li>А) варіант</li><li>Б) варіант</li><li>В) варіант</li><li>Г) варіант</li></ul>
+</div>
+<details><summary>Відповіді та пояснення</summary><div><p><strong>1. Б.</strong> Пояснення.</p></div></details>
+<p>Пропуск для заповнення: швидкість зростає, коли температура <span class="gap"></span>.</p>
+</section>
+
+<footer>© Дарина Проволовська · [рік]</footer>
+</main>
+<div class="tools" aria-label="Інструменти">
+<button type="button" class="size" title="Розмір шрифту" aria-label="Збільшити шрифт">A+</button>
+<button type="button" class="print" title="Друк" aria-label="Надрукувати конспект"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M6 14h12v7H6z"/></svg></button>
+<button type="button" class="up" title="Вгору" aria-label="Повернутися вгору"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
+</div>
+<script>
+(function(){
+  var toc=document.querySelector('.toc');
+  document.querySelectorAll('main .card').forEach(function(s,i){
+    var h=s.querySelector('h2'); if(!h) return;
+    var n=h.querySelector('.num'), num=n?n.textContent.trim():'';
+    s.id=s.id||'r'+(i+1);
+    var a=document.createElement('a'); a.href='#'+s.id;
+    a.textContent=(num?num+' · ':'')+h.textContent.replace(num,'').trim();
+    toc.appendChild(a);
+  });
+  if(toc&&!toc.children.length) toc.remove();
+  var up=document.querySelector('.tools .up');
+  addEventListener('scroll',function(){up.classList.toggle('show',scrollY>400)},{passive:true});
+  up.onclick=function(){scrollTo({top:0,behavior:'smooth'})};
+  document.querySelector('.tools .print').onclick=function(){print()};
+  var sizes=['18px','20px','22px'],k=0,root=document.documentElement;
+  document.querySelector('.tools .size').onclick=function(){
+    k=(k+1)%sizes.length; root.style.setProperty('--fs',sizes[k]);
+    this.textContent=k===sizes.length-1?'A−':'A+';
+    this.setAttribute('aria-label',k===sizes.length-1?'Зменшити шрифт':'Збільшити шрифт');
+  };
+  var closed=[];
+  addEventListener('beforeprint',function(){closed=[].filter.call(document.querySelectorAll('details'),function(d){return !d.open});closed.forEach(function(d){d.open=true})});
+  addEventListener('afterprint',function(){closed.forEach(function(d){d.open=false})});
+})();
+</script>
+</body>
+</html>
