@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Рух і взаємодія частинок речовини · Конспект</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&family=Playfair+Display:ital,wght@1,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false})"></script>
+<style>
+:root{--night:#081F44;--deep:#143660;--dive:#1F3F74;--sail:#4569AD;--lilac:#B9C8E6;--pink:#E679A6;--pink-ink:#B23E72;--pink-bg:#FCEFF5;--green:#587954;--green-bg:#EEF4EC;--blue-bg:#EDF2FB;--amber:#A44A0B;--amber-bg:#FFF5E8;--paper:#F5F7FB;--card:#FFFFFF;--ink:#13284A;--muted:#4A5D7E;--line:#DCE3EF;--fs:18px}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;font-size:var(--fs)}
+body{margin:0;font-family:Inter,system-ui,sans-serif;font-size:1rem;line-height:1.7;color:var(--ink);background:var(--paper);-webkit-font-smoothing:antialiased}
+a{color:var(--sail)}
+:focus-visible{outline:3px solid var(--pink);outline-offset:3px;border-radius:6px}
+.skip{position:absolute;left:-999px;top:8px;z-index:30;background:var(--night);color:#fff;padding:8px 14px;border-radius:8px}
+.skip:focus{left:8px}
+.hero{position:relative;overflow:hidden;color:#fff;padding:56px 20px 76px;background:radial-gradient(120% 140% at 85% 0%,var(--dive) 0%,var(--deep) 45%,var(--night) 100%)}
+.hero::after{content:"";position:absolute;left:-10%;right:-10%;bottom:-46px;height:92px;background:var(--paper);border-radius:50% 50% 0 0/100% 100% 0 0}
+.hero-in,.page{max-width:780px;margin:0 auto}
+.eyebrow{display:inline-block;padding:6px 12px;border-radius:999px;background:var(--lilac);color:var(--night);font:700 .72rem Manrope,sans-serif;letter-spacing:.14em;text-transform:uppercase}
+h1,h2,h3{margin:0;font-family:Manrope,sans-serif;line-height:1.2;letter-spacing:-.015em;color:var(--night)}
+.hero h1{margin:16px 0 14px;color:#fff;font-size:clamp(2rem,6vw,3.1rem)}
+.hero h1 em{font-family:"Playfair Display",Georgia,serif;font-style:italic;font-weight:500;color:#F6B3CF}
+.lead{margin:0;max-width:62ch;font-size:1.1rem;color:#E3EAF7}
+.page{padding:8px 20px 96px}
+.toc{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 28px}
+.toc a{padding:7px 13px;border-radius:999px;background:var(--card);border:1px solid var(--line);color:var(--ink);font-size:.82rem;font-weight:500;text-decoration:none}
+.toc a:hover{border-color:var(--pink);color:var(--pink-ink)}
+.card{margin:0 0 24px;padding:30px 32px;background:var(--card);border:1px solid var(--line);border-radius:22px;box-shadow:0 1px 2px rgba(8,31,68,.04),0 8px 24px rgba(8,31,68,.06);scroll-margin-top:16px}
+.card h2{display:flex;align-items:center;gap:12px;margin-bottom:16px;font-size:1.5rem}
+.num{flex:none;display:inline-grid;place-items:center;min-width:2.3rem;height:2.3rem;padding:0 8px;border-radius:12px;background:var(--pink-bg);color:var(--pink-ink);font:800 .9rem Manrope,sans-serif}
+.card h3{margin:28px 0 10px;padding-left:12px;border-left:4px solid var(--green);font-size:1.12rem}
+p{margin:0 0 14px;max-width:68ch}
+ul,ol{margin:0 0 14px;padding-left:1.3em}
+li{margin:4px 0}
+li::marker{color:var(--pink-ink)}
+strong{color:var(--night)}
+.formula{margin:20px 0 8px;padding:18px 20px;overflow-x:auto;text-align:center;font-size:1.15rem;background:var(--blue-bg);border:1px solid #CFDAF0;border-radius:16px}
+.where{margin-bottom:18px;font-size:.92rem;color:var(--muted)}
+.callout{position:relative;margin:20px 0;padding:16px 18px 16px 56px;border:1px solid;border-left-width:5px;border-radius:16px}
+.callout::before{position:absolute;left:18px;top:16px;font-size:1.2rem;line-height:1}
+.callout b:first-child{display:block;margin-bottom:4px;font-family:Manrope,sans-serif;font-size:.95rem}
+.callout.remember{background:var(--green-bg);border-color:#CFE0CB;border-left-color:var(--green)}
+.callout.remember::before{content:"📌"}
+.callout.remember b:first-child{color:var(--green)}
+.callout.info{background:var(--blue-bg);border-color:#D3DEF2;border-left-color:var(--sail)}
+.callout.info::before{content:"🧭"}
+.callout.info b:first-child{color:var(--sail)}
+.callout.fact{background:var(--pink-bg);border-color:#F5D3E2;border-left-color:var(--pink)}
+.callout.fact::before{content:"💡"}
+.callout.fact b:first-child{color:var(--pink-ink)}
+.callout.warn{background:var(--amber-bg);border-color:#F3DABA;border-left-color:var(--amber)}
+.callout.warn::before{content:"⚠️"}
+.callout.warn b:first-child{color:var(--amber)}
+table{width:100%;margin:18px 0;border-collapse:separate;border-spacing:0;font-size:.95rem;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+th,td{padding:12px 14px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+tr:last-child td{border-bottom:0}
+th{background:#E9EEF8;color:var(--night);font:700 .78rem Manrope,sans-serif;letter-spacing:.06em;text-transform:uppercase}
+tr:nth-child(even) td{background:#FAFBFE}
+dl.terms{display:grid;gap:4px;margin:0}
+dl.terms dt{margin-top:8px;color:var(--green);font:700 1.02rem Manrope,sans-serif}
+dl.terms dd{margin:0;padding-bottom:12px;border-bottom:1px dashed var(--line)}
+dl.terms dd:last-child{border-bottom:0}
+.q{margin:18px 0;padding:18px;background:#FBFCFE;border:1px solid var(--line);border-radius:16px}
+.q>p:first-child{margin-bottom:12px;font-weight:600}
+.options{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.options li{margin:0;padding:10px 14px;background:var(--card);border:1px solid var(--line);border-radius:12px}
+details{margin:14px 0;background:var(--green-bg);border:1px solid #CFE0CB;border-radius:14px}
+summary{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 18px;color:var(--green);font-weight:700;cursor:pointer;list-style:none}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"Показати";flex:none;padding:4px 10px;border-radius:999px;background:var(--green);color:#fff;font-size:.75rem;font-weight:600}
+details[open] summary::after{content:"Сховати"}
+details>div{padding:0 18px 16px;color:var(--ink)}
+.gap{display:inline-block;min-width:110px;margin:0 4px;border-bottom:2px dashed var(--pink)}
+main svg{display:block;max-width:100%;height:auto;margin:18px auto}
+footer{margin-top:40px;text-align:center;font-size:.85rem;color:var(--muted)}
+.tools{position:fixed;right:18px;bottom:18px;z-index:20;display:flex;flex-direction:column;gap:10px}
+.tools button{display:grid;padding:0;place-items:center;width:52px;height:52px;border:0;border-radius:50%;background:var(--night);color:#fff;font:800 .95rem Manrope,sans-serif;cursor:pointer;box-shadow:0 8px 22px rgba(8,31,68,.28);transition:transform .15s,background .2s,opacity .25s}
+.tools button:hover{background:var(--sail);transform:translateY(-2px)}
+.tools .print{background:var(--pink-ink)}
+.tools .print:hover{background:var(--pink)}
+.tools .up{opacity:0;pointer-events:none}
+.tools .up.show{opacity:1;pointer-events:auto}
+@media (max-width:600px){:root{--fs:17px}.hero{padding:40px 16px 64px}.page{padding:4px 14px 96px}.card{padding:22px 18px;border-radius:18px}.card h2{font-size:1.3rem}table{display:block;overflow-x:auto}.tools{right:12px;bottom:12px}.tools button{width:46px;height:46px}}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+@media print{html{font-size:11.5pt!important}body{background:#fff}.hero{padding:0 0 10px;background:none;color:var(--night)}.hero::after,.tools,.toc,.skip{display:none}.hero h1{color:var(--night)}.hero h1 em{color:var(--pink-ink)}.eyebrow{border:1px solid var(--lilac);background:none}.lead{color:var(--muted)}.page{padding:0}.card{padding:14px 16px;box-shadow:none;border-color:#C9D3E5}.q,.callout,.formula,table,details,main svg,h2,h3{break-inside:avoid}h2,h3{break-after:avoid}@page{margin:14mm}.q{padding:10px 12px}.options{gap:4px}.options li{padding:4px 10px}summary::after{display:none}a{color:inherit}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">До змісту</a>
+<header class="hero"><div class="hero-in">
+<span class="eyebrow">Фізика · 7 клас</span>
+<h1>Рух і взаємодія частинок речовини <em>невидимий танок</em></h1>
+<p class="lead">Усі тіла навколо нас складаються з найдрібніших частинок (атомів і молекул), які безперервно та хаотично рухаються, а також одночасно притягуються і відштовхуються між собою.</p>
+</div></header>
+<main class="page" id="main">
+<nav class="toc" aria-label="Зміст"></nav>
+
+<section class="card">
+  <h2><span class="num">01</span>Словничок термінів</h2>
+  <dl class="terms">
+    <dt>Тепловий рух</dt>
+    <dd>Безперервний, хаотичний (безладний) рух частинок речовини. Що вища температура, то <span class="gap"></span> швидшим стає цей рух.</dd>
+    <dt>Дифузія</dt>
+    <dd>Процес самовільного проникнення частинок однієї речовини в міжмолекулярні проміжки іншої (наприклад, заварювання чаю або поширення запаху парфумів).</dd>
+    <dt>Міжмолекулярна взаємодія</dt>
+    <dd>Сили притягання та відштовхування, що постійно діють між молекулами або атомами.</dd>
+  </dl>
+</section>
+
+<section class="card">
+  <h2><span class="num">02</span>Тепловий рух і дифузія</h2>
+  <p>Уяви, що ти розпилив освіжувач повітря в одному кутку кімнати. За кілька хвилин запах відчується в іншому. Чому? Бо молекули газу безперервно літають, зіштовхуються і перемішуються з молекулами повітря. Цей процес і є <strong>дифузією</strong>.</p>
+  <p>Дифузія відбувається в газах дуже швидко, у рідинах — повільніше, а у твердих тілах на це можуть знадобитися роки. Швидкість руху частинок безпосередньо пов'язана з температурою тіла.</p>
+
+  <div class="callout fact">
+    <b>Цікавий факт</b>
+    Чи можна повністю зупинити рух молекул? Теоретично так. Для цього речовину треба охолодити до так званого <em>абсолютного нуля</em>, що дорівнює $-273{,}15 \ ^\circ\text{C}$. Проте на практиці досягти цієї температури неможливо!
+  </div>
+
+  <h3>Перевірка до розділу 2</h3>
+  <div class="q">
+    <p><strong>1.</strong> Що є головною причиною явища дифузії?</p>
+    <ul class="options">
+    <li>А) Сили земного тяжіння</li>
+    <li>Б) Безперервний хаотичний рух частинок речовини</li>
+    <li>В) Атмосферний тиск</li>
+    <li>Г) Зміна агрегатного стану речовини</li>
+  </ul>
+  </div>
+  <div class="q">
+    <p><strong>2.</strong> Як зміниться швидкість дифузії, якщо речовину охолодити?</p>
+    <ul class="options">
+    <li>А) Збільшиться</li>
+    <li>Б) Не зміниться</li>
+    <li>В) Зменшиться</li>
+    <li>Г) Дифузія миттєво зупиниться</li>
+  </ul>
+  </div>
+  <details>
+    <summary>Відповіді та пояснення</summary>
+    <div>
+      <p><strong>1. Б.</strong> <em>Пояснення:</em> Дифузія відбувається саме тому, що частинки рухаються і перемішуються. Сила тяжіння (А) чи тиск (В) можуть викликати течію води чи вітер, але не саму дифузію. Дистрактор (Г) впливає на швидкість, а не є причиною.</p>
+      <p><strong>2. В.</strong> <em>Пояснення:</em> Температура — це міра середньої швидкості руху частинок. При охолодженні частинки рухаються повільніше, тому процес перемішування сповільнюється.</p>
+    </div>
+  </details>
+</section>
+
+<section class="card">
+  <h2><span class="num">03</span>Взаємодія частинок речовини</h2>
+  <p>Якщо молекули постійно рухаються, чому тверді тіла не розлітаються на друзки? Їх міцно утримують <strong>сили міжмолекулярного притягання</strong>.</p>
+  <p>Тоді виникає інше питання: якщо молекули притягуються, чому тіла не стискаються у крихітну точку? Річ у тім, що при дуже сильному зближенні частинок (коли відстань між ними стає меншою за їхні власні розміри) стрімко зростають <strong>сили відштовхування</strong>.</p>
+  <p>Коли ми розтягуємо еспандер, ми долаємо сили притягання, а коли намагаємося стиснути воду в шприці (затиснувши отвір) — відчуваємо сили відштовхування.</p>
+
+  <div class="callout warn">
+    <b>Типова помилка</b>
+    <em>«Під час нагрівання самі молекули збільшуються у розмірах».</em> Ні! Розміри молекул залишаються незмінними. Збільшується лише <strong>відстань</strong> між ними через інтенсивніший рух, тому тіло розширюється. А між самими молекулами — порожнеча (вакуум).
+  </div>
+
+  <h3>Перевірка до розділу 3</h3>
+  <div class="q">
+    <p><strong>3.</strong> Чому зламану навпіл крейду неможливо з'єднати назад у цілий шматок, просто притиснувши частини одна до одної?</p>
+    <ul class="options">
+    <li>А) Заважає повітря, що потрапило між частинами</li>
+    <li>Б) Відстань між молекулами на зламі надто велика для виникнення сил притягання</li>
+    <li>В) Сили відштовхування у твердих тілах завжди більші за сили притягання</li>
+    <li>Г) Крейда втрачає свою масу під час ламання</li>
+  </ul>
+  </div>
+  <div class="q">
+    <p><strong>4.</strong> Яке явище доводить існування сил міжмолекулярного відштовхування?</p>
+    <ul class="options">
+    <li>А) Розтікання краплі олії по поверхні води</li>
+    <li>Б) Поширення запаху квітів</li>
+    <li>В) Практична нестисливість рідин і твердих тіл</li>
+    <li>Г) Злипання двох свинцевих циліндрів із гладкими зрізами</li>
+  </ul>
+  </div>
+  <details>
+    <summary>Відповіді та пояснення</summary>
+    <div>
+      <p><strong>3. Б.</strong> <em>Пояснення:</em> Сили міжмолекулярного притягання діють лише на дуже малих відстанях (сумірних із розмірами молекул). Через шорсткість поверхні ми не можемо наблизити достатню кількість частинок.</p>
+      <p><strong>4. В.</strong> <em>Пояснення:</em> Якби молекули не відштовхувалися, ми б легко могли стиснути воду в мензурці або стиснути камінь. Дифузія (Б) доводить рух, а злипання циліндрів (Г) — притягання.</p>
+    </div>
+  </details>
+</section>
+
+<section class="card">
+  <h2><span class="num">04</span>Агрегатні стани речовини</h2>
+  <p>Будь-яка речовина може перебувати у трьох станах, при цьому <strong>самі молекули не змінюються</strong>. Змінюється лише відстань між ними та характер їхнього руху.</p>
+  
+  <svg viewBox="0 0 600 200" width="100%" xmlns="http://www.w3.org/2000/svg">
+    <g font-family="Inter, sans-serif" font-size="15" fill="#13284A" text-anchor="middle">
+      <!-- Тверде тіло -->
+      <rect x="10" y="40" width="170" height="150" rx="16" fill="none" stroke="#B9C8E6" stroke-width="2"/>
+      <text x="95" y="25" font-weight="700" fill="#081F44">Тверде тіло</text>
+      <g fill="#E679A6">
+        <circle cx="65" cy="80" r="12"/><circle cx="95" cy="80" r="12"/><circle cx="125" cy="80" r="12"/>
+        <circle cx="65" cy="110" r="12"/><circle cx="95" cy="110" r="12"/><circle cx="125" cy="110" r="12"/>
+        <circle cx="65" cy="140" r="12"/><circle cx="95" cy="140" r="12"/><circle cx="125" cy="140" r="12"/>
+      </g>
+      <text x="95" y="175" font-size="14" fill="#4A5D7E">Коливаються на місці</text>
+
+      <!-- Рідина -->
+      <rect x="215" y="40" width="170" height="150" rx="16" fill="none" stroke="#B9C8E6" stroke-width="2"/>
+      <text x="300" y="25" font-weight="700" fill="#081F44">Рідина</text>
+      <g fill="#4569AD">
+        <circle cx="270" cy="145" r="12"/><circle cx="300" cy="140" r="12"/><circle cx="330" cy="145" r="12"/>
+        <circle cx="285" cy="120" r="12"/><circle cx="315" cy="120" r="12"/><circle cx="255" cy="115" r="12"/>
+        <circle cx="300" cy="95" r="12"/><circle cx="330" cy="100" r="12"/><circle cx="275" cy="90" r="12"/>
+      </g>
+      <text x="300" y="175" font-size="14" fill="#4A5D7E">Стрибають, текучі</text>
+
+      <!-- Газ -->
+      <rect x="420" y="40" width="170" height="150" rx="16" fill="none" stroke="#B9C8E6" stroke-width="2"/>
+      <text x="505" y="25" font-weight="700" fill="#081F44">Газ</text>
+      <g fill="#587954">
+        <circle cx="460" cy="70" r="12"/>
+        <path d="M475,75 L500,85" stroke="#4569AD" stroke-width="2" stroke-dasharray="4,4"/>
+        <circle cx="540" cy="130" r="12"/>
+        <path d="M525,120 L505,100" stroke="#4569AD" stroke-width="2" stroke-dasharray="4,4"/>
+        <circle cx="460" cy="140" r="12"/>
+        <path d="M460,125 L470,105" stroke="#4569AD" stroke-width="2" stroke-dasharray="4,4"/>
+      </g>
+      <text x="505" y="175" font-size="14" fill="#4A5D7E">Рухаються вільно</text>
+    </g>
+  </svg>
+
+  <h3>Перевірка до розділу 4</h3>
+  <div class="q">
+    <p><strong>5.</strong> В якому агрегатному стані відстань між молекулами речовини зазвичай у десятки разів більша за розміри самих молекул?</p>
+    <ul class="options">
+    <li>А) Твердий</li>
+    <li>Б) Рідкий</li>
+    <li>В) Газоподібний</li>
+    <li>Г) У будь-якому</li>
+  </ul>
+  </div>
+  <div class="q">
+    <p><strong>6.</strong> Яка властивість характерна для рідин завдяки їхній молекулярній будові?</p>
+    <ul class="options">
+    <li>А) Зберігають і форму, і об'єм</li>
+    <li>Б) Зберігають об'єм, але легко змінюють форму</li>
+    <li>В) Займають увесь наданий їм об'єм</li>
+    <li>Г) Мають строгу кристалічну ґратку</li>
+  </ul>
+  </div>
+  <details>
+    <summary>Відповіді та пояснення</summary>
+    <div>
+      <p><strong>5. В.</strong> <em>Пояснення:</em> Величезні (в масштабах мікросвіту) відстані між молекулами пояснюють здатність газів легко стискатися. У твердих тілах і рідинах відстані сумірні з розмірами молекул.</p>
+      <p><strong>6. Б.</strong> <em>Пояснення:</em> Молекули рідини розташовані щільно (зберігають об'єм через відштовхування), але можуть «перестрибувати» на вільні місця (тому вони текучі й набувають форми посудини).</p>
+    </div>
+  </details>
+</section>
+
+<section class="card">
+  <h2><span class="num">05</span>Математика мікросвіту</h2>
+  <p>Розмір молекули можна оцінити за допомогою краплі олії на воді. Крапля розтікається, поки плівка не стане товщиною рівно в одну молекулу (мономолекулярний шар). Товщина такої плівки — це і є діаметр однієї молекули.</p>
+  
+  <div class="formula">
+    $$d = \frac{V}{S}$$
+  </div>
+  <p class="where">
+    де $d$ — діаметр молекули ($\text{м}$); $V$ — об'єм краплі ($\text{м}^3$); $S$ — площа утвореної плями ($\text{м}^2$).<br>
+    <em>Коли застосовувати:</em> Для експериментальної оцінки розміру молекул рідин, що не розчиняються у воді (олія, мастило).
+  </p>
+
+  <table>
+    <tr>
+      <th>Фізична величина</th>
+      <th>Позначення</th>
+      <th>Основна одиниця СІ</th>
+    </tr>
+    <tr>
+      <td>Діаметр молекули</td>
+      <td>$d$</td>
+      <td>$\text{м}$ (метр)</td>
+    </tr>
+    <tr>
+      <td>Об'єм краплі</td>
+      <td>$V$</td>
+      <td>$\text{м}^3$ (кубічний метр)</td>
+    </tr>
+    <tr>
+      <td>Площа плівки</td>
+      <td>$S$</td>
+      <td>$\text{м}^2$ (квадратний метр)</td>
+    </tr>
+    <tr>
+      <td>Довжина (відстань)</td>
+      <td>$L$ (або $l$)</td>
+      <td>$\text{м}$ (метр)</td>
+    </tr>
+  </table>
+
+  <div class="callout info">
+    <b>Приклад розв'язання задачі</b>
+    <em>Умова:</em> Крапля оливкової олії об'ємом $V = 1 \text{ мм}^3$ розтеклася водою, утворивши пляму площею $S = 0{,}5 \text{ м}^2$. Оціни діаметр молекули олії.<br>
+    <em>Розв'язання:</em><br>
+    1) Переводимо дані в СІ: $1 \text{ мм} = 10^{-3} \text{ м}$, отже $1 \text{ мм}^3 = 10^{-9} \text{ м}^3$. Тоді $V = 10^{-9} \text{ м}^3$.<br>
+    2) Підставляємо у формулу: $d = \frac{10^{-9}}{0{,}5} = 2 \cdot 10^{-9} \text{ м}$.<br>
+    <em>Відповідь:</em> $2 \cdot 10^{-9} \text{ м}$.
+  </div>
+
+  <h3>Перевірка до розділу 5 (Розрахункові)</h3>
+  <div class="q">
+    <p><strong>7.</strong> Крапля машинної оливи об'ємом $1{,}5 \text{ мм}^3$ утворила на воді пляму площею $0{,}5 \text{ м}^2$. Визнач діаметр молекули оливи.</p>
+    <ul class="options">
+    <li>А) $3 \cdot 10^{-9} \text{ м}$</li>
+    <li>Б) $0{,}75 \cdot 10^{-9} \text{ м}$</li>
+    <li>В) $3 \cdot 10^{-6} \text{ м}$</li>
+    <li>Г) $3 \text{ м}$</li>
+  </ul>
+  </div>
+  <div class="q">
+    <p><strong>8.</strong> Уяви, що молекули розташували щільно одна до одної в один прямий ряд. Скільки молекул уміститься на відрізку завдовжки $L = 2 \text{ мм}$, якщо діаметр однієї молекули становить $d = 4 \cdot 10^{-10} \text{ м}$? <em>(Підказка: $N = \frac{L}{d}$)</em></p>
+    <ul class="options">
+    <li>А) $5 \cdot 10^6$</li>
+    <li>Б) $5 \cdot 10^3$</li>
+    <li>В) $2 \cdot 10^6$</li>
+    <li>Г) $5 \cdot 10^9$</li>
+  </ul>
+  </div>
+  <details>
+    <summary>Відповіді та пояснення</summary>
+    <div>
+      <p><strong>7. А.</strong> <em>Пояснення:</em> Переводимо об'єм у СІ: $V = 1{,}5 \cdot 10^{-9} \text{ м}^3$. За формулою: $d = \frac{1{,}5 \cdot 10^{-9}}{0{,}5} = 3 \cdot 10^{-9} \text{ м}$. Дистрактор (Б) вийде, якщо помилково помножити. Дистрактор (В) виникає, якщо забути піднести $10^{-3}$ до куба, а (Г) — якщо взагалі не переводити одиниці.</p>
+      <p><strong>8. А.</strong> <em>Пояснення:</em> Переводимо довжину в СІ: $L = 2 \cdot 10^{-3} \text{ м}$. Ділимо: $N = \frac{2 \cdot 10^{-3}}{4 \cdot 10^{-10}} = 0{,}5 \cdot 10^7 = 5 \cdot 10^6$ (п'ять мільйонів молекул). Дистрактор (Г) вийде, якщо не перевести міліметри в метри. Дистрактор (В) — математична помилка при діленні 2 на 4.</p>
+    </div>
+  </details>
+</section>
+
+<section class="card">
+  <h2><span class="num">06</span>Підсумки та Перевір себе</h2>
+  <div class="callout remember">
+    <b>Ключовий висновок</b>
+    Світ не статичний. Усе, що здається суцільним і непорушним, насправді складається з міріадів частинок, що танцюють свій нескінченний тепловий танок, міцно тримаючись одна за одну силами притягання та відштовхуючись, коли стає надто тісно.
+  </div>
+
+  <h3>Усні запитання (Перевір себе)</h3>
+  <details>
+    <summary>Назви три основні положення про молекулярну будову речовини.</summary>
+    <div>1. Усі речовини складаються з частинок (молекул, атомів). 2. Ці частинки безперервно та хаотично рухаються (тепловий рух). 3. Частинки взаємодіють між собою (притягуються і відштовхуються).</div>
+  </details>
+  <details>
+    <summary>Чому запах розлитого чаю у теплій кімнаті пошириться швидше, ніж у холодній?</summary>
+    <div>Через вищу температуру! Температура є мірою середньої швидкості руху молекул. У теплій кімнаті молекули повітря та ефірних олій чаю рухаються швидше, тому дифузія відбувається інтенсивніше.</div>
+  </details>
+  <details>
+    <summary>Чим принципово відрізняється розташування молекул у льоду, воді та водяній парі?</summary>
+    <div>Молекули льоду (твердого тіла) утворюють жорстку кристалічну ґратку і лише коливаються на місці. У воді (рідині) вони розташовані щільно, але можуть «перестрибувати», що дає текучість. У парі (газі) молекули розлетілися на величезні відстані й рухаються абсолютно вільно.</div>
+  </details>
+</section>
+
+<footer>© Дарина Проволовська · 2026</footer>
+</main>
+<div class="tools" aria-label="Інструменти">
+<button type="button" class="size" title="Розмір шрифту" aria-label="Збільшити шрифт">A+</button>
+<button type="button" class="print" title="Друк" aria-label="Надрукувати конспект"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M6 14h12v7H6z"/></svg></button>
+<button type="button" class="up" title="Вгору" aria-label="Повернутися вгору"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
+</div>
+<script>
+(function(){
+  var toc=document.querySelector('.toc');
+  document.querySelectorAll('main .card').forEach(function(s,i){
+    var h=s.querySelector('h2'); if(!h) return;
+    var n=h.querySelector('.num'), num=n?n.textContent.trim():'';
+    s.id=s.id||'r'+(i+1);
+    var a=document.createElement('a'); a.href='#'+s.id;
+    a.textContent=(num?num+' · ':'')+h.textContent.replace(num,'').trim();
+    toc.appendChild(a);
+  });
+  if(toc&&!toc.children.length) toc.remove();
+  var up=document.querySelector('.tools .up');
+  addEventListener('scroll',function(){up.classList.toggle('show',scrollY>400)},{passive:true});
+  up.onclick=function(){scrollTo({top:0,behavior:'smooth'})};
+  document.querySelector('.tools .print').onclick=function(){print()};
+  var sizes=['18px','20px','22px'],k=0,root=document.documentElement;
+  document.querySelector('.tools .size').onclick=function(){
+    k=(k+1)%sizes.length; root.style.setProperty('--fs',sizes[k]);
+    this.textContent=k===sizes.length-1?'A−':'A+';
+    this.setAttribute('aria-label',k===sizes.length-1?'Зменшити шрифт':'Збільшити шрифт');
+  };
+  var closed=[];
+  addEventListener('beforeprint',function(){closed=[].filter.call(document.querySelectorAll('details'),function(d){return !d.open});closed.forEach(function(d){d.open=true})});
+  addEventListener('afterprint',function(){closed.forEach(function(d){d.open=false})});
+})();
+</script>
+</body>
+</html>
