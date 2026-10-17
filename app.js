@@ -778,3 +778,465 @@
 
   window.KZ = { icon, store };
 })();
+
+/* =========================================================
+   Конструктор занять · спільна логіка
+   - шапка, футер, хвиля на фоні
+   - рендер форм за конфігом і збирання промпту
+   - автозбереження (спільні поля «основи» — для всіх сторінок)
+   ========================================================= */
+(function () {
+  "use strict";
+
+  /* ---------- навігація ---------- */
+  const PAGES = [
+    { id: "index", href: "index.html", label: "Головна" },
+    { id: "course", href: "course.html", label: "Курс" },
+    { id: "scenario", href: "scenario.html", label: "Сценарії" },
+    { id: "presentation", href: "presentation.html", label: "Презентації" },
+    { id: "notes", href: "notes.html", label: "Конспекти" },
+    { id: "cards", href: "cards.html", label: "Картки" },
+    { id: "universal", href: "universal.html", label: "Усе й одразу" },
+    { id: "library", href: "library.html", label: "Бібліотека" }
+  ];
+
+  const AUTHOR = "Дарина Проволовська";
+  const BRAND_STYLE =
+    "строго мій фірмовий стиль, не змінюй його: темно-синій фон-градієнт #081F44 → #143660 → #1F3F74, акцент #4569AD, світлий акцент #B9C8E6, текст #EEF3FC; панелі «матове скло» (напівпрозорі, blur, тонка світла рамка, радіус 24px); шрифти Manrope (заголовки), Inter (текст), курсивні акценти Playfair Display; жодних інших кольорів, шрифтів і CSS-фреймворків";
+
+  /* Замкнений шаблон HTML-документа (конспект, сценарій). ШІ копіює <style> дослівно і лише заповнює зміст. */
+  const DOC_TEMPLATE = `<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>[Тема] · Конспект</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@600;700&family=Playfair+Display:ital,wght@1,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+<style>
+:root{--night:#081F44;--deep:#143660;--dive:#1F3F74;--sail:#4569AD;--lilac:#B9C8E6;--text:#EEF3FC;--soft:rgba(238,243,252,.74);--glass:rgba(185,200,230,.09);--line:rgba(214,226,248,.2)}
+*{box-sizing:border-box}
+body{margin:0;font:16px/1.65 Inter,system-ui,sans-serif;color:var(--text);background:radial-gradient(120% 80% at 80% 0%,var(--dive),var(--deep) 40%,var(--night) 80%) fixed var(--night)}
+.page{max-width:820px;margin:0 auto;padding:48px 20px 64px}
+.eyebrow{font:600 12px Manrope,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--lilac)}
+h1,h2,h3{font-family:Manrope,sans-serif;letter-spacing:-.02em;line-height:1.15;margin:0}
+h1{font-size:clamp(34px,6vw,54px);margin:10px 0 14px}
+h1 em,.accent{font-family:"Playfair Display",Georgia,serif;font-style:italic;font-weight:500;color:var(--lilac)}
+.lead{font-size:18px;color:var(--soft);margin:0 0 32px}
+.card{background:var(--glass);border:1px solid var(--line);border-radius:24px;padding:26px;margin:0 0 20px;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 10px 36px rgba(2,10,28,.35)}
+.card h2{font-size:24px;margin-bottom:12px}
+.card h2 .num{font-family:"Playfair Display",serif;font-style:italic;font-weight:500;color:var(--lilac);margin-right:10px}
+.card h3{font-size:18px;margin:18px 0 8px}
+p{margin:0 0 12px}
+.formula{margin:16px 0;padding:16px 18px;border-radius:16px;background:rgba(4,15,36,.5);border:1px solid var(--line);overflow-x:auto;text-align:center}
+.where{font-size:14px;color:var(--soft)}
+.callout{margin:16px 0;padding:14px 16px 14px 46px;border-radius:16px;position:relative;border:1px solid var(--line);background:rgba(69,105,173,.18)}
+.callout::before{position:absolute;left:14px;top:13px;font-size:18px}
+.callout.remember::before{content:"📌"}
+.callout.info::before{content:"🧭"}
+.callout.fact::before{content:"💡"}
+.callout.warn{background:rgba(185,200,230,.08)}
+.callout.warn::before{content:"⚠️"}
+.callout b:first-child{display:block;font-family:Manrope,sans-serif;margin-bottom:2px}
+table{width:100%;border-collapse:collapse;margin:14px 0;font-size:15px}
+th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{font:600 13px Manrope,sans-serif;color:var(--lilac);text-transform:uppercase;letter-spacing:.06em}
+dl.terms{margin:0}dl.terms dt{font-weight:600;color:var(--lilac);margin-top:10px}dl.terms dd{margin:2px 0 0}
+details{margin:10px 0;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.04)}
+summary{cursor:pointer;padding:12px 16px;font-weight:600;list-style:none}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"＋";float:right;color:var(--lilac)}
+details[open] summary::after{content:"－"}
+details>div{padding:0 16px 14px;color:var(--soft)}
+.gap{display:inline-block;min-width:90px;border-bottom:2px dashed var(--lilac)}
+svg{max-width:100%;height:auto}
+footer{margin-top:36px;font-size:13px;color:rgba(238,243,252,.5);text-align:center}
+@media (max-width:600px){.page{padding:32px 16px 48px}.card{padding:20px 16px;border-radius:20px}}
+@media print{body{background:#fff;color:#081F44}.card{box-shadow:none;backdrop-filter:none;background:#fff;border-color:#B9C8E6;break-inside:avoid}h1 em,.accent,.eyebrow,th,dl.terms dt,.card h2 .num{color:#4569AD}.lead,.where,details>div{color:#143660}.formula{background:#F2F5FB}}
+</style>
+</head>
+<body>
+<main class="page">
+<span class="eyebrow">[Предмет · Клас]</span>
+<h1>[Тема] <em>[2–3 слова-акцент]</em></h1>
+<p class="lead">[Головна ідея одним реченням]</p>
+<section class="card"><h2><span class="num">01</span>[Назва розділу]</h2>
+  [зміст розділу]
+</section>
+<footer>© Дарина Проволовська · [поточний рік]</footer>
+</main>
+</body>
+</html>`;
+
+  function styleLock() {
+    return "\n# ФІРМОВИЙ СТИЛЬ — СТРОГО, НЕ ЗМІНЮВАТИ\n" +
+      "Оформи результат як ОДИН HTML-файл строго за шаблоном нижче.\n" +
+      "- Блок <head> і весь <style> скопіюй ДОСЛІВНО, символ у символ. ЗАБОРОНЕНО змінювати, додавати чи видаляти будь-які CSS-правила, кольори, шрифти, розміри, відступи.\n" +
+      "- ЗАБОРОНЕНО: атрибут style=\"\", власні класи, інші шрифти, CSS-фреймворки (Tailwind, Bootstrap), інші бібліотеки, крім KaTeX із шаблону, зовнішні зображення.\n" +
+      "- Міняй лише текст у квадратних дужках і вміст <main>, використовуючи ТІЛЬКИ ці компоненти:\n" +
+      "  • розділ: <section class=\"card\"><h2><span class=\"num\">01</span>Назва</h2>…</section> (номери 01, 02, 03…)\n" +
+      "  • підзаголовок: <h3>; текст: <p>, <ul>, <ol>, <strong>, <em>\n" +
+      "  • формула: <div class=\"formula\">$$…$$</div>, одразу під нею <p class=\"where\">де … — … (одиниця СІ)</p>; формули в тексті — $…$\n" +
+      "  • вставки: <div class=\"callout remember\"><b>Запам'ятай</b>…</div>, <div class=\"callout info\"><b>Довідка</b>…</div>, <div class=\"callout fact\"><b>Цікавий факт</b>…</div>, <div class=\"callout warn\"><b>Типова помилка</b>…</div>\n" +
+      "  • таблиця: звичайна <table> з <th>\n" +
+      "  • словничок: <dl class=\"terms\"><dt>Термін</dt><dd>Пояснення простими словами</dd></dl>\n" +
+      "  • «Перевір себе»: <details><summary>Питання</summary><div>Відповідь</div></details>\n" +
+      "  • пропуск для заповнення: <span class=\"gap\"></span>\n" +
+      "  • схема: вбудований <svg> без фону, лише кольори #B9C8E6, #4569AD, #EEF3FC, підписи шрифтом Inter\n" +
+      "- Якщо для елемента немає компонента — використай звичайний тег без стилів. Дизайн не обговорюй і не «покращуй».\n" +
+      "- Віддай лише код HTML в одному блоці, без пояснень до і після.\n\n" +
+      "```html\n" + DOC_TEMPLATE + "\n```\n";
+  }
+
+  const icon = {
+    copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>',
+    down: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M6 11l6 6 6-6M4 21h16"/></svg>',
+    ext: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>',
+    reset: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5"/></svg>'
+  };
+
+  /* ---------- безпечне сховище ---------- */
+  const store = {
+    get(k) { try { return JSON.parse(localStorage.getItem(k) || "null"); } catch (e) { return null; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+    del(k) { try { localStorage.removeItem(k); } catch (e) {} }
+  };
+
+  /* ---------- оболонка сторінки ---------- */
+  function waveRow(cls, color, amp, len) {
+    let d = "M0 " + (200 - amp);
+    for (let x = 0; x < 2880; x += len) d += " q" + len / 4 + " " + -amp + " " + len / 2 + " 0 t" + len / 2 + " 0";
+    d += " V400 H0 Z";
+    return '<svg class="' + cls + '" viewBox="0 0 2880 400" preserveAspectRatio="none" aria-hidden="true"><path fill="' + color + '" d="' + d + '"/></svg>';
+  }
+
+  function mountShell() {
+    const page = document.body.dataset.page || "index";
+    const ocean = document.createElement("div");
+    ocean.className = "ocean";
+    ocean.setAttribute("aria-hidden", "true");
+    ocean.innerHTML = '<img class="curl" src="wave.webp" alt="" decoding="async">' +
+      waveRow("w1", "#4569AD", 46, 480) + waveRow("w2", "#1F3F74", 34, 360) + waveRow("w3", "#081F44", 26, 640);
+    document.body.prepend(ocean);
+
+    const top = document.getElementById("top");
+    if (top) {
+      top.className = "topbar";
+      top.innerHTML = '<div class="wrap"><div class="bar glass">' +
+        '<a class="brand" href="index.html"><span class="mark"></span>Конструктор занять</a>' +
+        '<nav class="nav" aria-label="Розділи">' +
+        PAGES.map(p => '<a href="' + p.href + '"' + (p.id === page ? ' aria-current="page"' : "") + ">" + p.label + "</a>").join("") +
+        "</nav></div></div>";
+      const cur = top.querySelector('[aria-current="page"]');
+      const nav = top.querySelector(".nav");
+      if (cur && nav) nav.scrollLeft = cur.offsetLeft - nav.clientWidth / 2 + cur.clientWidth / 2;
+    }
+
+    // номер розділу в підписі сторінки — за порядком у меню
+    const eb = document.querySelector(".page-head .eyebrow");
+    const idx = PAGES.findIndex(p => p.id === page);
+    if (eb && idx > 0) eb.textContent = eb.textContent.replace(/\(\s*\d+\s*·/, "( " + String(idx).padStart(2, "0") + " ·");
+
+    const foot = document.getElementById("foot");
+    if (foot) {
+      foot.className = "footer";
+      foot.innerHTML = '<div class="wrap"><div class="row"><span>© ' + AUTHOR + ", " + new Date().getFullYear() +
+        "</span><span>Конструктор занять з фізики та астрономії</span></div></div>";
+    }
+  }
+
+  /* ---------- спільні поля (основа заняття) ---------- */
+  const GRADES = ["7 клас", "8 клас", "9 клас", "10 клас", "11 клас", "13–16 років (змішана група)", "Підготовка до НМТ", "Олімпіадна група", "Студенти / дорослі"];
+  const BASE_SECTIONS = [
+    {
+      title: "Основа заняття", hint: "спільна для всіх сторінок", fields: [
+        { type: "seg", name: "subject", label: "Предмет", options: ["Фізика", "Астрономія", "Фізика + астрономія"], value: "Фізика", full: true },
+        { type: "text", name: "topic", label: "Тема заняття", placeholder: "Напр.: Сонячна система", full: true },
+        { type: "select", name: "grade", label: "Клас / вік", options: GRADES, value: "9 клас" },
+        { type: "select", name: "duration", label: "Тривалість", options: ["45 хв", "60 хв", "90 хв"], value: "45 хв" },
+        { type: "seg", name: "level", label: "Рівень глибини", options: ["Базовий", "Високий шкільний, з формулами", "Поглиблений / олімпіадний"], value: "Високий шкільний, з формулами", full: true },
+        { type: "seg", name: "group", label: "Формат", options: ["Групове", "Індивідуальне"], value: "Групове" },
+        { type: "seg", name: "mode", label: "Де", options: ["Онлайн", "Офлайн"], value: "Офлайн" },
+        { type: "select", name: "program", label: "Орієнтир програми", options: ["Чинна шкільна програма (НУШ)", "Підготовка до НМТ", "Олімпіадна програма", "Неформальна освіта, без обмежень"], value: "Неформальна освіта, без обмежень", full: true }
+      ]
+    },
+    {
+      title: "Місце в курсі", hint: "щоб заняття було зв'язане з іншими", fields: [
+        { type: "text", name: "course", label: "Назва курсу", placeholder: "Напр.: Космічні структури" },
+        { type: "text", name: "lessonNo", label: "Номер заняття", placeholder: "Напр.: 3" },
+        { type: "text", name: "prevTopic", label: "Минула тема", placeholder: "Напр.: Світло та його швидкість", full: true },
+        { type: "textarea", name: "nextTopic", label: "Наступна тема (і її ауткам)", placeholder: "Напр.: Відстані до зір (учні вміють пояснити паралакс…)", rows: 2, full: true }
+      ]
+    },
+    {
+      title: "Зміст заняття", fields: [
+        { type: "textarea", name: "plan", label: "Хід заняття / план", placeholder: "Звідки взялося «наше місце»: геоцентрична і геліоцентрична моделі… Масштаб… Астрономічна одиниця…", rows: 5, full: true },
+        { type: "textarea", name: "practice", label: "Практика", placeholder: "Групове завдання «Сонячна система на нитці» (1 а. о. = 10 см)…", rows: 3, full: true },
+        { type: "textarea", name: "aim", label: "Мета та ауткам заняття", placeholder: "Учні розуміють, що астрономічна одиниця — природна «лінійка» Сонячної системи…", rows: 3, full: true },
+        { type: "formulas", name: "formulas", label: "Ключові формули", placeholder: "r_п = a(1 - e)\nr_а = a(1 + e)\nT^2 = a^3", rows: 3, full: true, hint: "Можна LaTeX або звичайним записом — по одній на рядок." },
+        { type: "textarea", name: "material", label: "Матеріал / готовий сценарій (необов'язково)", placeholder: "Встав текст теорії, уривок підручника або вже готовий сценарій…", rows: 5, full: true, hint: "Асистент спиратиметься саме на цей текст і не вигадуватиме зайвого." }
+      ]
+    }
+  ];
+
+  const TEST_FIELDS = (on) => ([
+    { type: "switch", name: "test", label: "Додати тест", value: on, controls: "testbox" },
+    {
+      type: "group", id: "testbox", fields: [
+        { type: "number", name: "tcount", label: "Кількість питань", value: 8, min: 1, max: 60 },
+        { type: "seg", name: "tlevel", label: "Складність", options: ["Однакова", "Зростає", "Три рівні"], value: "Зростає" },
+        { type: "chips", name: "ttypes", label: "Типи завдань", options: ["Одна правильна", "Кілька правильних", "На відповідність", "Послідовність", "Розрахункова задача", "Так / ні", "Відкрита відповідь"], value: ["Одна правильна", "Розрахункова задача"], full: true },
+        { type: "select", name: "tplace", label: "Де розмістити", options: ["Окремим блоком у кінці", "Короткі перевірки після кожного розділу", "І там, і там"], value: "Окремим блоком у кінці" },
+        { type: "select", name: "tformat", label: "Формат тесту", options: ["Звичайний текст", "Інтерактивний HTML з перевіркою", "Формат для Google Forms", "Формат для Kahoot / Quizizz (таблиця)"], value: "Звичайний текст" },
+        { type: "switch", name: "tkey", label: "Ключ відповідей", value: true },
+        { type: "switch", name: "texplain", label: "Пояснення до кожної відповіді", value: true }
+      ]
+    }
+  ]);
+
+  const EXTRA = { type: "textarea", name: "extra", label: "Додаткові побажання", placeholder: "Напр.: більше прикладів з повсякденного життя, згадати місію JWST, український слід в астрономії…", rows: 3, full: true };
+  const NOTE_TYPES = ["Короткий конспект для учня (Markdown)", "Повний конспект для учня", "Теоретичний конспект для викладача (оповідь)", "Робочий зошит з пропусками"];
+  const isTeacherNotes = { name: "ntype", in: [NOTE_TYPES[2]] };
+  const isStudentNotes = { name: "ntype", in: [NOTE_TYPES[0], NOTE_TYPES[1], NOTE_TYPES[3]] };
+
+  /* ---------- конфіги сторінок ---------- */
+  const CONFIGS = {
+    course: {
+      base: false,
+      sections: [
+        {
+          title: "Курс", fields: [
+            { type: "select", name: "cmode", label: "Що створити", options: ["Силабус курсу", "Детальна структура кожного заняття", "Силабус + детальна структура занять"], value: "Силабус курсу", full: true },
+            { type: "seg", name: "subject", label: "Предмет", options: ["Фізика", "Астрономія", "Фізика + астрономія"], value: "Фізика + астрономія", full: true },
+            { type: "text", name: "ctopic", label: "Тематика курсу", placeholder: "Напр.: Сонячна система", full: true },
+            { type: "text", name: "cname", label: "Назва курсу", placeholder: "Порожньо — ШІ запропонує сам" },
+            { type: "text", name: "cnamehint", label: "Ідея для назви", placeholder: "Напр.: пов'язана зі структурами та інформацією" },
+            { type: "textarea", name: "coutcomes", label: "Ключові аутками курсу", placeholder: "Учні навчились пояснювати механіку Сонячної системи, розуміти принцип утворення люків Кірквуда, розрізняти транснептунові об'єкти…", rows: 4, full: true },
+            { type: "select", name: "grade", label: "Цільова аудиторія", options: GRADES, value: "13–16 років (змішана група)" },
+            { type: "seg", name: "level", label: "Рівень", options: ["Базовий", "Високий шкільний, з формулами", "Поглиблений / олімпіадний"], value: "Високий шкільний, з формулами", full: true }
+          ]
+        },
+        {
+          title: "Обсяг і формат", fields: [
+            { type: "number", name: "clessons", label: "Навчальних занять", value: 5, min: 1, max: 30 },
+            { type: "select", name: "cfinalfmt", label: "Підсумкове заняття", options: ["Рольова гра", "Командна гра / квест", "Дебати / симуляція засідання", "Проєкт / дослідження", "Залік у формі гри", "Без підсумкового заняття"], value: "Рольова гра" },
+            { type: "chips", name: "cdur", label: "Тривалість заняття", options: ["45 хв", "60 хв", "90 хв"], value: ["45 хв", "60 хв"], full: true },
+            { type: "select", name: "cratio", label: "Теорія / практика", options: ["30% теорії / 70% практики", "20% теорії / 80% практики", "40% теорії / 60% практики", "50% / 50%", "На розсуд, окремо для кожного заняття"], value: "30% теорії / 70% практики", full: true },
+            { type: "chips", name: "capproach", label: "Підхід", options: ["Дослідницький підхід", "Експерименти", "Робота з даними", "Симуляції", "Логічне мислення", "Критичне мислення", "Без сухого завчання формул", "Сторітелінг", "Гейміфікація"], value: ["Дослідницький підхід", "Експерименти", "Логічне мислення", "Без сухого завчання формул"], full: true },
+            { type: "switch", name: "ctie", label: "Кожне заняття строго пов'язане з минулим і наступним", value: true }
+          ]
+        },
+        {
+          title: "Каркас (якщо вже є)", fields: [
+            { type: "textarea", name: "cframe", label: "Каркас занять", placeholder: "Заняття 1. Ньютон — нерелятивістська гравітація, маса та інертність…\nЗаняття 2. Ейнштейн — викривлення простору-часу…", rows: 6, full: true },
+            { type: "textarea", name: "cfinalscript", label: "Сценарій фіналу / ролі", placeholder: "Група ділиться на 4 фракції: вчені ЦЕРНу, інспектори МАГАТЕ, маркетологи, комітет з етики…", rows: 4, full: true },
+            { type: "chips", name: "cdetail", label: "Для детальної структури додати", options: ["Вступний гачок", "Ключові питання", "Вартісні пойнти", "Матеріали та симуляції", "Питання для рефлексії"], value: ["Вступний гачок", "Вартісні пойнти", "Матеріали та симуляції"], full: true, showIf: { name: "cmode", in: ["Детальна структура кожного заняття", "Силабус + детальна структура занять"] } }
+          ]
+        },
+        { title: "Побажання", fields: [EXTRA] }
+      ],
+      build: buildCourse
+    },
+    scenario: {
+      sections: [
+        {
+          title: "Параметри сценарію", fields: [
+            { type: "select", name: "ltype", label: "Тип заняття", options: ["Вивчення нового матеріалу", "Розв'язування задач", "Закріплення та узагальнення", "Лабораторна / практична робота", "Комбіноване", "Підготовка до олімпіади"], value: "Вивчення нового матеріалу" },
+            { type: "number", name: "qcount", label: "Питань у проблематиці", value: 5, min: 2, max: 8 },
+            { type: "chips", name: "sgoals", label: "Основні цілі", options: ["Концептуальна", "Математична", "Фізична", "Світоглядна"], value: ["Концептуальна", "Математична", "Фізична", "Світоглядна"], full: true },
+            { type: "chips", name: "smethods", label: "Методична основа", options: ["Inquiry-based learning", "Гейміфікація / челендж", "Peer-to-peer, робота в командах", "Демонстраційний дослід", "Віртуальні симуляції", "Робота з даними", "Модель у масштабі", "Гіпотеза «ЯКЩО… ТО… ТОМУ ЩО…»", "Історія відкриттів", "Астрономічне спостереження"], value: ["Inquiry-based learning", "Гейміфікація / челендж", "Peer-to-peer, робота в командах", "Віртуальні симуляції"], full: true },
+            { type: "switch", name: "sblitz", label: "⚡ Бліц-питання з відповідями після кожного блоку", value: true },
+            { type: "number", name: "sbank", label: "Банк бліц-питань у кінці", value: 80, min: 0, max: 200, showIf: { name: "sblitz", on: true } },
+            { type: "switch", name: "sslides", label: "Посилання на слайди презентації (сл. N)", value: true },
+            { type: "switch", name: "sdialog", label: "Репліки викладача для ключових блоків", value: true },
+            { type: "switch", name: "sequip", label: "Обладнання: для викладача / для учнів", value: true },
+            { type: "switch", name: "sdiff", label: "Диференціація для сильніших і тих, кому складно", value: false },
+            { type: "switch", name: "shw", label: "Домашнє завдання", value: false },
+            { type: "select", name: "sform", label: "Формат видачі", options: ["Таблиці Markdown (для Google Docs / Word)", "Документ HTML у фірмовому стилі", "Звичайний текст з підзаголовками"], value: "Таблиці Markdown (для Google Docs / Word)", full: true }
+          ]
+        },
+        { title: "Перевірка знань", fields: TEST_FIELDS(false) },
+        { title: "Побажання", fields: [EXTRA] }
+      ],
+      build: buildScenario
+    },
+    presentation: {
+      sections: [
+        {
+          title: "Параметри презентації", fields: [
+            { type: "number", name: "slides", label: "Кількість слайдів", value: 20, min: 3, max: 80 },
+            { type: "select", name: "pformat", label: "Що має видати асистент", options: ["Послайдовий план (Слайд N: що зображено / теза)", "Готова HTML-презентація (один файл)", "Таблиця для Canva / PowerPoint", "Markdown для Marp / Slidev", "Файл .pptx (якщо асистент вміє)"], value: "Послайдовий план (Слайд N: що зображено / теза)" },
+            { type: "seg", name: "pstyle", label: "Подача", options: ["Мінімум тексту, максимум візуалізацій", "Науково-популярна", "Академічна"], value: "Мінімум тексту, максимум візуалізацій", full: true },
+            { type: "chips", name: "pinclude", label: "Включити", options: ["Титульний слайд", "Вступний гачок", "Ключові питання заняття", "Історія відкриттів", "Формули з поясненням величин", "Графіки та схеми", "Модель у масштабі / порівняння", "Задача з розв'язанням", "Слайди-ігри та челенджі", "Слайди для бліц-питань", "Посилання на симуляції", "Місток до наступної теми"], value: ["Титульний слайд", "Вступний гачок", "Ключові питання заняття", "Графіки та схеми", "Задача з розв'язанням", "Слайди-ігри та челенджі", "Місток до наступної теми"], full: true },
+            { type: "switch", name: "psync", label: "Номери слайдів узгоджені зі сценарієм (сл. N)", value: true },
+            { type: "switch", name: "pnotes", label: "Нотатки доповідача до кожного слайда", value: true },
+            { type: "switch", name: "pimg", label: "Для кожного слайда — що знайти / згенерувати (зображення, джерело)", value: true },
+            { type: "switch", name: "pbrand", label: "Мій фірмовий стиль (палітра цього сайту)", value: true },
+            { type: "number", name: "pmaxwords", label: "Макс. слів на слайді", value: 25, min: 5, max: 120 }
+          ]
+        },
+        { title: "Перевірка знань", fields: TEST_FIELDS(false) },
+        { title: "Побажання", fields: [EXTRA] }
+      ],
+      build: buildPresentation
+    },
+    notes: {
+      sections: [
+        {
+          title: "Параметри конспекту", fields: [
+            { type: "select", name: "ntype", label: "Тип конспекту", options: NOTE_TYPES, value: NOTE_TYPES[0], full: true },
+            { type: "number", name: "nwords", label: "Обсяг, слів", value: 9000, min: 1000, max: 20000, showIf: isTeacherNotes },
+            { type: "number", name: "nhours", label: "Час опрацювання, год", value: 2, min: 1, max: 6, showIf: isTeacherNotes },
+            { type: "chips", name: "nblocks", label: "Довідкові вставки", options: ["📌 Запам'ятати", "🧭 Довідка", "💡 Цікавий факт", "🇺🇦 Український слід"], value: ["📌 Запам'ятати", "🧭 Довідка", "💡 Цікавий факт"], full: true, showIf: isTeacherNotes },
+            { type: "number", name: "npages", label: "Обсяг, сторінок A4", value: 1, min: 1, max: 12, showIf: isStudentNotes },
+            { type: "seg", name: "ntone", label: "Тон", options: ["Дружній", "Збалансований", "Академічний"], value: "Дружній", full: true, showIf: isStudentNotes },
+            { type: "chips", name: "ninclude", label: "Включити", options: ["Головна ідея уроку", "Словничок 2–3 термінів простими словами", "Ключовий висновок", "Питання для самоперевірки", "Таблиця величин і одиниць СІ", "Розв'язані приклади", "Схеми / рисунки (SVG)", "Типові помилки", "Цікавий факт"], value: ["Головна ідея уроку", "Словничок 2–3 термінів простими словами", "Ключовий висновок", "Питання для самоперевірки"], full: true, showIf: isStudentNotes },
+            { type: "select", name: "nformat", label: "Формат", options: ["HTML-конспект у стилі сайту", "HTML для друку A4", "Markdown (для освітнього простору)", "Суцільний текст із заголовками"], value: "HTML-конспект у стилі сайту", full: true },
+            { type: "switch", name: "nbrand", label: "Замкнений фірмовий стиль — ШІ не може змінювати дизайн", value: true, showIf: { name: "nformat", in: ["HTML-конспект у стилі сайту", "HTML для друку A4"] } }
+          ]
+        },
+        { title: "Перевірка знань", fields: TEST_FIELDS(false) },
+        { title: "Побажання", fields: [EXTRA] }
+      ],
+      build: buildNotes
+    },
+    cards: {
+      sections: [
+        {
+          title: "Параметри карток", fields: [
+            { type: "number", name: "ccount", label: "Кількість карток", value: 20, min: 3, max: 200 },
+            { type: "seg", name: "clevel", label: "Складність", options: ["Легкі", "Змішані", "Складні"], value: "Змішані" },
+            { type: "chips", name: "ctypes", label: "Типи питань", options: ["Бліц (коротке питання — коротка відповідь)", "Чому так?", "Парадокси та хибні уявлення", "Оцінки за порядком величини", "Явища в повсякденні", "Історія відкриттів", "Що буде, якщо…?", "Астрономічні спостереження", "Міні-задачі", "Формула → зміст"], value: ["Бліц (коротке питання — коротка відповідь)", "Чому так?", "Парадокси та хибні уявлення", "Що буде, якщо…?"], full: true },
+            { type: "seg", name: "canswer", label: "Відповідь", options: ["Коротка (1–2 речення)", "Розгорнута з поясненням"], value: "Коротка (1–2 речення)", full: true },
+            { type: "select", name: "cformat", label: "Формат видачі", options: ["Інтерактивні HTML-фліп-картки", "Таблиця: питання | відповідь", "CSV для Anki (front;back)", "JSON"], value: "Інтерактивні HTML-фліп-картки", full: true },
+            { type: "switch", name: "cgroup", label: "Згрупувати за блоками заняття", value: false },
+            { type: "switch", name: "chint", label: "Підказка до кожної картки", value: false },
+            { type: "switch", name: "cmcq", label: "Варіанти відповідей (картка-тест)", value: false },
+            { type: "switch", name: "cbrand", label: "Мій фірмовий стиль (для HTML)", value: true }
+          ]
+        },
+        { title: "Побажання", fields: [EXTRA] }
+      ],
+      build: buildCards
+    },
+    universal: {
+      sections: [
+        {
+          title: "Що створити", fields: [
+            { type: "chips", name: "uwhat", label: "Матеріали", options: ["Сценарій заняття", "Презентація", "Конспект для учня", "Теоретичний конспект для викладача", "Картки-питання"], value: ["Сценарій заняття", "Презентація", "Конспект для учня", "Картки-питання"], full: true },
+            { type: "number", name: "slides", label: "Слайдів у презентації", value: 20, min: 3, max: 80 },
+            { type: "number", name: "sbank", label: "Бліц-питань у банку сценарію", value: 80, min: 0, max: 200 },
+            { type: "number", name: "nwords", label: "Слів у теорії для викладача", value: 9000, min: 1000, max: 20000 },
+            { type: "number", name: "ccount", label: "Карток-питань", value: 20, min: 3, max: 200 },
+            { type: "select", name: "uformat", label: "Формат усіх матеріалів", options: ["Як зручно для кожного типу", "Markdown з LaTeX", "HTML-файли (кожен окремо)"], value: "Як зручно для кожного типу" },
+            { type: "select", name: "uflow", label: "Як видавати", options: ["Поетапно: спершу план, далі по одному матеріалу", "Усе однією відповіддю, розділами"], value: "Поетапно: спершу план, далі по одному матеріалу" },
+            { type: "switch", name: "ubrand", label: "Мій фірмовий стиль (для HTML)", value: true }
+          ]
+        },
+        { title: "Перевірка знань", fields: TEST_FIELDS(false) },
+        { title: "Побажання", fields: [EXTRA] }
+      ],
+      build: buildUniversal
+    }
+  };
+
+  /* ---------- рендер полів ---------- */
+  let uid = 0;
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+  function renderField(f) {
+    const html = renderInner(f);
+    if (!f.showIf) return html;
+    const s = f.showIf;
+    return '<div class="cond' + (f.full || f.type === "switch" ? " full" : "") + '" data-if="' + s.name + '" data-in="' + esc(s.in ? s.in.join("|") : "") + '"' + (s.on ? ' data-on="1"' : "") + ">" + html + "</div>";
+  }
+
+  function renderInner(f) {
+    const id = "f_" + f.name + "_" + (++uid);
+    const cls = "field" + (f.full ? " full" : "");
+    const hint = f.hint ? "<small>" + esc(f.hint) + "</small>" : "";
+    switch (f.type) {
+      case "text":
+        return '<div class="' + cls + '"><label for="' + id + '">' + f.label + '</label><input type="text" id="' + id + '" name="' + f.name + '" placeholder="' + esc(f.placeholder || "") + '">' + hint + "</div>";
+      case "number":
+        return '<div class="' + cls + '"><label for="' + id + '">' + f.label + '</label><input type="number" id="' + id + '" name="' + f.name + '" value="' + f.value + '" min="' + (f.min || 0) + '" max="' + (f.max || 999) + '" inputmode="numeric">' + hint + "</div>";
+      case "select":
+        return '<div class="' + cls + '"><label for="' + id + '">' + f.label + '</label><select id="' + id + '" name="' + f.name + '">' +
+          f.options.map(o => "<option" + (o === f.value ? " selected" : "") + ">" + esc(o) + "</option>").join("") + "</select>" + hint + "</div>";
+      case "textarea":
+      case "formulas": {
+        let tools = "";
+        if (f.type === "formulas") {
+          const snips = ["\\frac{a}{b}", "x^{2}", "\\sqrt{x}", "\\vec{F}", "\\Delta", "\\cdot", "\\omega", "\\lambda", "\\rho", "\\varphi", "M_\\odot", "\\approx"];
+          tools = '<div class="formula-tools">' + snips.map(s => '<button type="button" data-snip="' + esc(s) + '">' + esc(s) + "</button>").join("") + "</div>";
+        }
+        return '<div class="' + cls + '"><label for="' + id + '">' + f.label + '</label><textarea id="' + id + '" name="' + f.name + '" rows="' + (f.rows || 4) + '"' + (f.type === "formulas" ? ' class="mono"' : "") + ' placeholder="' + esc(f.placeholder || "") + '"></textarea>' + tools + hint + "</div>";
+      }
+      case "seg":
+      case "chips": {
+        const multi = f.type === "chips";
+        const vals = multi ? (f.value || []) : [f.value];
+        return '<div class="' + cls + '"><span class="label" id="' + id + '">' + f.label + '</span><div class="' + f.type + '" role="group" aria-labelledby="' + id + '">' +
+          f.options.map((o, i) => {
+            const oid = id + "_" + i;
+            return '<input type="' + (multi ? "checkbox" : "radio") + '" id="' + oid + '" name="' + f.name + '" value="' + esc(o) + '"' + (vals.includes(o) ? " checked" : "") + '><label for="' + oid + '">' + esc(o) + "</label>";
+          }).join("") + "</div>" + hint + "</div>";
+      }
+      case "switch":
+        return '<div class="field full"><label class="switch"><input type="checkbox" name="' + f.name + '"' + (f.value ? " checked" : "") + (f.controls ? ' data-controls="' + f.controls + '"' : "") + '><span class="track"></span><span>' + f.label + "</span></label></div>";
+      case "group":
+        return '<div class="subblock full" id="' + f.id + '"><div class="grid">' + f.fields.map(renderField).join("") + "</div></div>";
+    }
+    return "";
+  }
+
+  function renderSection(sec, n) {
+    return '<section class="panel glass"><div class="panel-title"><span class="step">' + n + "</span><h2>" + sec.title + "</h2>" +
+      (sec.hint ? '<span class="hint">' + sec.hint + "</span>" : "") + '</div><div class="grid">' + sec.fields.map(renderField).join("") + "</div></section>";
+  }
+
+  /* ---------- читання/запис форми ---------- */
+  function readForm(form) {
+    const v = {};
+    form.querySelectorAll("input, select, textarea").forEach(el => {
+      if (!el.name) return;
+      if (el.type === "checkbox" && el.closest(".chips")) {
+        v[el.name] = v[el.name] || [];
+        if (el.checked) v[el.name].push(el.value);
+      } else if (el.type === "checkbox") v[el.name] = el.checked;
+      else if (el.type === "radio") { if (el.checked) v[el.name] = el.value; }
+      else v[el.name] = el.value.trim();
+    });
+    return v;
+  }
+
+  function writeForm(form, v) {
+    if (!v) return;
+    form.querySelectorAll("input, select, textarea").forEach(el => {
+      if (!el.name || !(el.name in v)) return;
+      const val = v[el.name];
+      if (el.type === "checkbox" && el.closest(".chips")) el.checked = Array.isArray(val) && val.includes(el.value);
+      else if (el.type === "checkbox") el.checked = !!val;
+      else if (el.type === "radio") el.checked = el.value === val;
+      else if (el.tagName === "SELECT") { if ([...el.options].some(o => o.value === val)) el.value = val; }
+      else el.value = val;
+    });
+  }
+
+  const BASE_NAMES = BASE_SECTIONS.flatMap(s => s.fields.map(f => f.name));
+
+  /* ---------- допоміжне для промптів ---------- */
+  const list = arr => (arr && arr.length ? arr.join(", ") : "на твій розсуд");
+  const block = (title, text) => (text ? "\n### " + title + '\n"""\n' + text + '\n"""\n' : "");
+  const subjGen = v => v.subject === "Астрономія" ? "астрономії" : v.subject === "Фізика + астрономія" ? "фізики та астрономії" : "фізики";
+  const low = s => (s || "").toLowerCase();
+
+  function header(v, task, role) {
+    let out = "# Роль\n" + (role || "Ти — досвідчений викладач STEM-дисциплін та методист з " + subjGen(v) + ", який пояснює складне просто, точно й цікаво.") +
+      " Пишеш українською, дотримуєшся сучасної української термінології та одиниць СІ.\n\n";
+    out += "# Завдання\n" + task + "\n\n";
+    out += "# Вихідні дані\n";
+    if
