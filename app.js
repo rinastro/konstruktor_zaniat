@@ -1655,3 +1655,21 @@ footer{margin-top:36px;font-size:13px;color:rgba(238,243,252,.5);text-align:cent
 
   window.KZ = { icon, store };
 })();
+
+/* ---------- кнопка «Вгору» ---------- */
+.totop {
+  position: fixed; right: 18px; bottom: 18px; z-index: 40;
+  width: 48px; height: 48px; border-radius: 50%;
+  display: grid; place-items: center;
+  border: 1px solid var(--glass-border);
+  background: rgba(8, 31, 68, .7); color: var(--text);
+  -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur);
+  font: 700 20px var(--f-display); cursor: pointer;
+  box-shadow: 0 10px 28px rgba(2, 10, 28, .45);
+  opacity: 0; pointer-events: none; transform: translateY(10px);
+  transition: opacity .25s, transform .25s, background .2s;
+}
+.totop.show { opacity: 1; pointer-events: auto; transform: none; }
+.totop:hover { background: var(--sailing); }
+.totop:focus-visible { outline: 3px solid var(--lilac); outline-offset: 3px; }
+@media (max-width: 980px) { .jump { right: 76px; } }
