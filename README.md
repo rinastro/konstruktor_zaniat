@@ -20,8 +20,8 @@
 
 ## Як додати матеріал у бібліотеку
 
-1. Покладіть готовий файл у папку `materials/` (наприклад, `materials/kepler.html`).
-2. Відкрийте `library/materials.js` і додайте запис у масив:
+1. Завантажте готовий файл у корінь репозиторію поруч з іншими (наприклад, `kepler.html`).
+2. Відкрийте `materials.js` (на GitHub — значок олівця) і додайте запис у масив:
 
 ```js
 window.MATERIALS = [
@@ -30,7 +30,7 @@ window.MATERIALS = [
     subject: "Астрономія",        // "Фізика" або "Астрономія"
     type: "Конспект",             // Презентація | Сценарій | Конспект | Картки | Комплект
     grade: "11 клас",
-    url: "materials/kepler.html",
+    url: "kepler.html",
     date: "2026-10-17"
   },
 ];
@@ -38,34 +38,33 @@ window.MATERIALS = [
 
 Книжки стають на полиці в порядку списку: спершу заповнюється верхня полиця, потім наступні.
 
-## Публікація на GitHub Pages
+## Публікація
 
-1. Створіть новий репозиторій на GitHub.
-2. Завантажте **вміст** цієї папки (не саму папку) у корінь репозиторію: *Add file → Upload files*.
-3. *Settings → Pages → Build and deployment*: Source — **Deploy from a branch**, гілка `main`, папка `/ (root)`.
-4. За хвилину сайт буде доступний за адресою `https://<ваш-логін>.github.io/<назва-репозиторію>/`.
+Усі файли лежать в одній папці, без підпапок — тому їх можна завантажити на GitHub одним виділенням:
+*Add file → Upload files* → виділіть **усі** файли (Ctrl+A) → *Commit changes*.
 
-Сайт повністю статичний (HTML + CSS + JS, без збірки), тому так само працює на Vercel або Netlify і навіть просто відкритий з диска.
+Файл `.nojekyll` прихований — якщо він не вибирається, це не страшно (для Vercel він не потрібен).
+
+- **Vercel:** підключіть репозиторій, Framework Preset — *Other*, без команди збірки. Кожен коміт оновлює сайт автоматично.
+- **GitHub Pages:** *Settings → Pages* → Deploy from a branch → `main` / `(root)`.
 
 ## Налаштування
 
-- **Кольори** — змінні на початку `assets/css/style.css` (`--lilac`, `--solid`, `--sailing`, `--dive`, `--deep`, `--night`).
-- **Поля форм і тексти промптів** — `assets/js/app.js`: об'єкт `CONFIGS` (поля сторінок) і функції `build…` (як збирається промпт).
-- **Хвиля на фоні** — `assets/img/wave.webp`.
+- **Кольори** — змінні на початку `style.css` (`--lilac`, `--solid`, `--sailing`, `--dive`, `--deep`, `--night`).
+- **Поля форм і тексти промптів** — `app.js`: об'єкт `CONFIGS` і функції `build…`.
+- **Хвиля на фоні** — `wave.webp`.
 
-## Структура
+## Файли
 
 ```
-├── index.html
-├── presentation.html · scenario.html · notes.html · cards.html · universal.html
-├── library.html
-├── assets/
-│   ├── css/style.css
-│   ├── js/app.js        — шапка, хвиля, конструктор промптів
-│   ├── js/library.js    — полички бібліотеки
-│   └── img/wave.webp
-├── library/materials.js — список готових матеріалів
-└── materials/           — файли готових матеріалів
+index.html                         — титулка з папками
+presentation.html · scenario.html · notes.html · cards.html · universal.html
+library.html                       — бібліотека
+style.css                          — увесь дизайн
+app.js                             — шапка, хвиля, конструктор промптів
+library.js                         — полички бібліотеки
+materials.js                       — список готових матеріалів
+wave.webp                          — хвиля на фоні
 ```
 
 ---
