@@ -1,0 +1,956 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Космічна магістраль</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Onest:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: horizontal "highway" route map on top, then five stations (zones) stacked as stops along the road; a sticky lesson-clock rail and a crew drawer for 11 students. Deliberately single dark theme (space). */
+:root{
+  color-scheme: dark;
+  --bg:#0F172A; --bg2:#121B31; --panel:#17213B; --panel2:#1D2947; --line:#2B395D; --line2:#3B4B75;
+  --fg:#E7ECF8; --muted:#97A3C2; --faint:#64708F;
+  --z0:#B7C3FF; --z1:#3FE0F2; --z2:#F6B13E; --z3:#E35BD8; --z4:#33D695;
+  --ok:#33D695; --bad:#FF6B7A; --sticky:#FFE28A; --stickyInk:#2A2205;
+  --display:"Unbounded", "Arial Black", system-ui, sans-serif;
+  --body:"Onest", "Segoe UI", system-ui, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  --r:14px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+#sky{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.wrap{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--display);font-weight:700;text-wrap:balance;margin:0;letter-spacing:-.01em}
+h1{font-size:clamp(24px,4.2vw,44px);line-height:1.08}
+h2{font-size:clamp(20px,2.6vw,28px);line-height:1.15}
+h3{font-size:15px;line-height:1.3;font-weight:600}
+p{margin:0}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.muted{color:var(--muted)}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--z1);outline-offset:2px}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line2);background:var(--panel2);border-radius:999px;padding:7px 14px;font-weight:600;font-size:14px;transition:background .15s,border-color .15s}
+.btn:hover{border-color:var(--zc,var(--z1));background:color-mix(in srgb,var(--zc,var(--z1)) 14%,var(--panel2))}
+.btn.solid{background:var(--zc,var(--z1));color:#0B1222;border-color:transparent}
+.btn.sm{padding:4px 10px;font-size:13px}
+input[type=text],input[type=number],select,textarea{background:var(--bg2);border:1px solid var(--line2);border-radius:10px;padding:7px 10px;min-width:0}
+input[type=range]{width:100%;accent-color:var(--zc,var(--z1))}
+
+/* top rail */
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bg)}
+.rail{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.rail .wrap{display:flex;align-items:center;gap:12px;padding-block:8px;flex-wrap:wrap}
+.clock{display:flex;align-items:center;gap:8px}
+.clock .t{font-family:var(--mono);font-size:15px;min-width:56px}
+.track{flex:1 1 360px;min-width:0;position:relative;height:30px;display:flex;border-radius:8px;overflow:hidden;border:1px solid var(--line)}
+.track a{display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;color:var(--fg);text-decoration:none;border-right:1px solid var(--bg);background:color-mix(in srgb,var(--zc) 18%,var(--panel));white-space:nowrap;overflow:hidden;min-width:0}
+.track a:last-child{border-right:0}
+.track a.now{background:color-mix(in srgb,var(--zc) 45%,var(--panel));font-weight:600}
+.track .needle{position:absolute;top:-2px;bottom:-2px;width:3px;background:#fff;box-shadow:0 0 8px #fff;left:0;transition:left 1s linear;pointer-events:none}
+.timer{font-family:var(--mono);font-size:15px;padding:5px 12px;border-radius:999px;border:1px solid var(--line2);background:var(--panel)}
+.timer.run{border-color:var(--z2);color:var(--z2)}
+.timer.done{background:var(--bad);color:#fff;animation:blink .6s 6}
+@keyframes blink{50%{opacity:.35}}
+
+/* hero + route */
+.hero{padding-block:34px 18px;display:grid;gap:14px}
+.hero .meta{display:flex;flex-wrap:wrap;gap:8px 18px;color:var(--muted);font-size:14px}
+.route{position:relative;margin-top:6px;overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:linear-gradient(180deg,rgba(255,255,255,.02),transparent)}
+.route svg{display:block;min-width:820px;width:100%;height:auto}
+.route .st{cursor:pointer}
+.route .st:hover circle.ring{stroke-width:4}
+.route text{font-family:var(--body);fill:var(--fg)}
+.route .scale{font-family:var(--mono);fill:var(--muted);font-size:11px}
+
+/* zones */
+.zone{--zc:var(--z1);position:relative;margin-block:26px;padding:22px;border-radius:20px;border:1px solid color-mix(in srgb,var(--zc) 40%,var(--line));background:linear-gradient(160deg,color-mix(in srgb,var(--zc) 8%,var(--bg2)),var(--bg2) 55%);scroll-margin-top:70px}
+.zone[data-z="0"]{--zc:var(--z0)}.zone[data-z="1"]{--zc:var(--z1)}.zone[data-z="2"]{--zc:var(--z2)}.zone[data-z="3"]{--zc:var(--z3)}.zone[data-z="4"]{--zc:var(--z4)}
+.zhead{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:10px 20px;margin-bottom:18px}
+.zhead .tag{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;color:var(--zc);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
+.zhead .tag::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--zc);box-shadow:0 0 10px var(--zc)}
+.zhead .goal{color:var(--muted);max-width:60ch;margin-top:6px}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(12,minmax(0,1fr))}
+.c12{grid-column:span 12}.c8{grid-column:span 8}.c7{grid-column:span 7}.c6{grid-column:span 6}.c5{grid-column:span 5}.c4{grid-column:span 4}
+@media (max-width:860px){.c8,.c7,.c6,.c5,.c4{grid-column:span 12}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.card .num{font-family:var(--mono);font-size:11px;color:var(--zc);letter-spacing:.1em}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.out{font-family:var(--mono);font-variant-numeric:tabular-nums;background:var(--bg2);border:1px dashed var(--line2);border-radius:10px;padding:8px 12px;font-size:14px}
+.out b{color:var(--zc)}
+svg text{font-family:var(--body)}
+.svgbox{background:#0B1222;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.svgbox svg,.svgbox canvas{display:block;width:100%;height:auto;max-width:100%}
+.teacher{border-top:1px dashed var(--line2);margin-top:16px;padding-top:12px}
+.teacher summary{cursor:pointer;font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.06em}
+.teacher ul{margin:10px 0 0;padding-left:18px;color:var(--muted);display:grid;gap:4px}
+.teacher b{color:var(--fg)}
+
+/* chips & drops */
+.chip{touch-action:none;user-select:none;-webkit-user-select:none;display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:10px;background:var(--panel2);border:1px solid var(--line2);font-weight:600;cursor:grab;font-size:14px}
+.chip.sel{outline:2px solid var(--zc);outline-offset:2px}
+.chip.lifted{opacity:.3}
+.chip.ok{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 18%,var(--panel2))}
+.chip.bad{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 18%,var(--panel2))}
+.ghost{position:fixed;z-index:100;pointer-events:none;transform:translate(-50%,-50%) rotate(-3deg);box-shadow:0 10px 30px rgba(0,0,0,.5);cursor:grabbing}
+[data-drop]{transition:border-color .12s,background .12s}
+[data-drop].hot{border-color:var(--zc)!important;background:color-mix(in srgb,var(--zc) 12%,transparent)!important}
+.tray{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;padding:10px;border:1px dashed var(--line2);border-radius:12px}
+.baskets{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:520px){.baskets{grid-template-columns:1fr}}
+.basket{border:2px dashed var(--line2);border-radius:14px;padding:12px;min-height:150px;display:flex;flex-direction:column;gap:8px}
+.basket .bh{font-family:var(--display);font-size:14px;display:flex;justify-content:space-between;align-items:center}
+.basket .in{display:flex;flex-wrap:wrap;gap:8px;align-content:flex-start;flex:1}
+.hint{display:inline-block;background:var(--sticky);color:var(--stickyInk);padding:6px 10px;border-radius:4px;transform:rotate(-1.5deg);font-weight:600;font-size:13px;box-shadow:0 4px 10px rgba(0,0,0,.3)}
+.verdict{font-weight:600;min-height:1.5em}
+.verdict.ok{color:var(--ok)}.verdict.bad{color:var(--bad)}
+
+/* mood constellations */
+.consts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media (max-width:700px){.consts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.const{border:1px solid var(--line2);border-radius:14px;padding:10px;min-height:120px;display:flex;flex-direction:column;gap:8px;background:radial-gradient(circle at 30% 20%,rgba(183,195,255,.08),transparent 60%)}
+.const .ch{font-weight:600;font-size:14px}
+.const .in{display:flex;flex-wrap:wrap;gap:6px;flex:1;align-content:flex-start}
+.star-tok{padding:4px 9px 4px 6px;border-radius:999px;font-size:12px;background:color-mix(in srgb,var(--h) 22%,var(--panel2));border-color:color-mix(in srgb,var(--h) 60%,var(--line2))}
+.star-tok::before{content:"★";color:var(--h)}
+
+/* quiz */
+.quiz{display:flex;flex-direction:column;gap:8px}
+.quiz .q{font-weight:600}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opt{border:1px solid var(--line2);background:var(--bg2);border-radius:10px;padding:8px 12px;text-align:left;font-size:14px}
+.opt:hover{border-color:var(--zc)}
+.opt.ok{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 20%,var(--bg2))}
+.opt.bad{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 16%,var(--bg2))}
+.fb{font-size:14px;color:var(--muted);min-height:1.2em}
+.ow{display:inline-flex;align-items:center;gap:2px}
+.tally{display:inline-flex;align-items:center;gap:4px;margin-left:4px;font-family:var(--mono);font-size:12px;color:var(--muted)}
+.tally button{width:22px;height:22px;border-radius:50%;border:1px solid var(--line2);background:var(--panel2);font-size:12px;line-height:1;padding:0}
+
+/* formula */
+.formula{font-family:var(--display);font-size:clamp(34px,6vw,58px);text-align:center;color:var(--zc);padding:10px 0;letter-spacing:.02em}
+.formula small{display:block;font-family:var(--body);font-size:14px;color:var(--muted);letter-spacing:0;margin-top:4px}
+.task{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:10px;border-radius:12px;background:var(--bg2);border:1px solid var(--line)}
+.task .dot{width:14px;height:14px;border-radius:50%}
+.task input{width:100%}
+@media (max-width:520px){.task{grid-template-columns:auto 1fr}.task .btn{grid-column:span 2}}
+
+/* ladder */
+.ladder{display:flex;flex-direction:column;gap:8px}
+.rung{display:grid;grid-template-columns:40px 1fr;align-items:center;gap:10px}
+.rung .n{font-family:var(--mono);color:var(--muted);text-align:right}
+.slot{min-height:46px;border:2px dashed var(--line2);border-radius:12px;padding:5px;display:flex;align-items:center}
+.slot .chip{width:100%;justify-content:space-between}
+.flag{background:var(--z2);color:#231600;font-weight:700;padding:6px 12px;border-radius:4px 14px 14px 4px;display:inline-block;font-size:14px}
+
+/* cosmic web */
+.markers{display:flex;flex-wrap:wrap;gap:8px}
+.mk{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line2);background:var(--bg2);border-radius:999px;padding:6px 12px;font-weight:600;font-size:14px}
+.mk i{width:14px;height:14px;border-radius:50%;display:inline-block}
+.mk[aria-pressed="true"]{border-color:var(--fg);background:var(--panel2)}
+#web{cursor:crosshair;touch-action:manipulation}
+
+/* passport */
+.pass{display:grid;gap:8px}
+.prow{display:grid;grid-template-columns:150px repeat(3,minmax(0,1fr));gap:8px;align-items:center;padding:8px;border-radius:12px;background:var(--bg2);border:1px solid var(--line)}
+.prow .lv{font-weight:600;font-size:14px;display:flex;align-items:center;gap:8px}
+.prow .lv i{width:calc(6px + var(--k)*3px);height:calc(6px + var(--k)*3px);border-radius:50%;border:2px solid var(--z4);flex:none}
+.prow select{width:100%;font-size:13px;padding:6px}
+.prow select.ok{border-color:var(--ok)}.prow select.bad{border-color:var(--bad)}
+.phead{display:grid;grid-template-columns:150px repeat(3,minmax(0,1fr));gap:8px;padding:0 8px}
+@media (max-width:760px){.prow,.phead{grid-template-columns:1fr}.phead{display:none}}
+
+/* blitz */
+.blitz{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+@media (max-width:640px){.blitz{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.flip{perspective:800px;min-height:118px;border:0;background:none;padding:0;text-align:left}
+.flip .in{position:relative;width:100%;height:100%;min-height:118px;transition:transform .45s;transform-style:preserve-3d}
+.flip.open .in{transform:rotateY(180deg)}
+.flip .f,.flip .b{position:absolute;inset:0;backface-visibility:hidden;border-radius:12px;padding:12px;display:flex;flex-direction:column;justify-content:space-between;gap:6px}
+.flip .f{background:var(--panel2);border:1px solid var(--line2)}
+.flip .b{background:color-mix(in srgb,var(--z4) 20%,var(--panel));border:1px solid var(--z4);transform:rotateY(180deg)}
+.flip .k{font-family:var(--mono);font-size:11px;color:var(--z4)}
+.flip .tx{font-weight:600}
+
+/* stickies */
+.wall{display:flex;flex-wrap:wrap;gap:12px;min-height:90px;padding:12px;border-radius:12px;background:repeating-linear-gradient(45deg,rgba(255,255,255,.015) 0 10px,transparent 10px 20px);border:1px dashed var(--line2)}
+.sticky{background:var(--sticky);color:var(--stickyInk);width:150px;min-height:96px;padding:10px 10px 22px;border-radius:3px;box-shadow:0 6px 14px rgba(0,0,0,.35);font-size:14px;position:relative;word-wrap:break-word}
+.sticky:nth-child(3n){transform:rotate(1.6deg);background:#FFC9E8}
+.sticky:nth-child(3n+1){transform:rotate(-1.4deg)}
+.sticky:nth-child(4n){background:#BDF5DC}
+.sticky .who{position:absolute;bottom:4px;left:10px;font-size:11px;opacity:.7}
+.sticky .x{position:absolute;top:2px;right:4px;border:0;background:none;color:inherit;opacity:.5}
+.quote{font-family:var(--display);font-weight:500;font-size:clamp(20px,3vw,30px);line-height:1.25;text-wrap:balance}
+.check4{display:grid;gap:8px}
+.check4 .it{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;background:var(--bg2);border:1px solid var(--line)}
+.check4 .it>span:nth-child(2){flex:1}
+.seg{display:inline-flex;border:1px solid var(--line2);border-radius:999px;overflow:hidden}
+.seg button{border:0;background:transparent;padding:4px 12px;font-weight:700}
+.seg button[aria-pressed="true"]{background:var(--z4);color:#062016}
+.seg button.q[aria-pressed="true"]{background:var(--z2);color:#231600}
+.rate{display:flex;gap:6px}
+.rate button{border:0;background:none;font-size:26px;color:var(--faint);padding:0 2px}
+.rate button.on{color:var(--z2);text-shadow:0 0 10px var(--z2)}
+
+/* crew drawer */
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(420px,100%);z-index:50;background:var(--bg2);border-left:1px solid var(--line2);transform:translateX(105%);transition:transform .25s;display:flex;flex-direction:column;padding:calc(14px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) calc(14px + env(safe-area-inset-bottom,0px)) 16px;gap:12px;box-shadow:-20px 0 40px rgba(0,0,0,.4)}
+.drawer.open{transform:none}
+.drawer .scroll{overflow:auto;display:flex;flex-direction:column;gap:14px;min-height:0}
+.crew{display:grid;gap:6px}
+.mate{display:grid;grid-template-columns:22px 1fr auto;gap:8px;align-items:center}
+.mate .s{color:var(--h);font-size:18px;text-align:center}
+.mate input{padding:5px 8px;font-size:14px}
+.pts{display:flex;align-items:center;gap:4px}
+.pts b{font-family:var(--mono);min-width:24px;text-align:center}
+.pts button{width:26px;height:26px;border-radius:50%;border:1px solid var(--line2);background:var(--panel2);padding:0}
+.pick{font-family:var(--display);font-size:28px;text-align:center;padding:14px;border-radius:14px;background:var(--panel);border:1px solid var(--line2);min-height:72px;color:var(--h,var(--fg))}
+.groups{display:grid;gap:6px}
+.groups div{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:6px 10px;font-size:14px}
+.scrim{position:fixed;inset:0;z-index:45;background:rgba(5,8,18,.5);display:none}
+.scrim.on{display:block}
+footer{padding-block:30px 50px;color:var(--faint);font-size:13px;text-align:center}
+</style>
+
+<canvas id="sky" aria-hidden="true"></canvas>
+
+<div class="rail">
+  <div class="wrap">
+    <div class="clock">
+      <button class="btn sm" id="lessonBtn" title="Почати відлік заняття">▶ Старт</button>
+      <span class="t" id="lessonT">00:00</span>
+    </div>
+    <nav class="track" id="track" aria-label="Етапи заняття">
+      <a href="#z0" style="--zc:var(--z0);flex:5" data-i="0">0–5 Старт</a>
+      <a href="#z1" style="--zc:var(--z1);flex:15" data-i="1">5–20 Паралакс</a>
+      <a href="#z2" style="--zc:var(--z2);flex:15" data-i="2">20–35 Свічки</a>
+      <a href="#z3" style="--zc:var(--z3);flex:15" data-i="3">35–50 Павутина</a>
+      <a href="#z4" style="--zc:var(--z4);flex:10" data-i="4">50–60 Фінал</a>
+      <span class="needle" id="needle"></span>
+    </nav>
+    <span class="timer" id="timer" title="Таймер">⏱ --:--</span>
+    <button class="btn sm" id="crewBtn">★ Екіпаж · 11</button>
+  </div>
+</div>
+
+<main class="wrap">
+  <header class="hero">
+    <div class="eyebrow">Наше місце у Всесвіті · Заняття 5 · фінал курсу</div>
+    <h1>Як виміряти відстань до зорі?</h1>
+    <div class="meta"><span>Демократична школа «Майбутні»</span><span>Викладачка: Дарина</span><span>60 хв · група 11 учнів</span></div>
+    <div class="route" aria-label="Карта маршруту від Землі до краю спостережуваного Всесвіту">
+      <svg viewBox="0 0 1100 190" id="routeSvg" role="img" aria-label="Маршрут заняття">
+        <defs>
+          <linearGradient id="road" x1="0" x2="1">
+            <stop offset="0" stop-color="#B7C3FF"/><stop offset=".27" stop-color="#3FE0F2"/><stop offset=".52" stop-color="#F6B13E"/><stop offset=".76" stop-color="#E35BD8"/><stop offset="1" stop-color="#33D695"/>
+          </linearGradient>
+        </defs>
+        <path d="M40 120 C 200 40, 300 170, 440 100 S 700 40, 820 110 S 1000 150, 1060 80" fill="none" stroke="url(#road)" stroke-width="6" stroke-linecap="round" opacity=".9"/>
+        <path d="M40 120 C 200 40, 300 170, 440 100 S 700 40, 820 110 S 1000 150, 1060 80" fill="none" stroke="#0F172A" stroke-width="1.5" stroke-dasharray="10 12"/>
+        <g class="st" data-go="z0" tabindex="0" role="link" aria-label="Зона 0"><circle cx="40" cy="120" r="16" fill="#0F172A" class="ring" stroke="#B7C3FF" stroke-width="3"/><circle cx="40" cy="120" r="7" fill="#4C8DFF"/><text x="24" y="160" text-anchor="start" font-size="13" font-weight="600">Земля · Старт</text></g>
+        <g class="st" data-go="z1" tabindex="0" role="link" aria-label="Зона 1"><circle cx="300" cy="118" r="16" fill="#0F172A" class="ring" stroke="#3FE0F2" stroke-width="3"/><text x="300" y="123" text-anchor="middle" font-size="14" fill="#3FE0F2">p</text><text x="300" y="160" text-anchor="middle" font-size="13" font-weight="600">Паралакс</text></g>
+        <g class="st" data-go="z2" tabindex="0" role="link" aria-label="Зона 2"><circle cx="560" cy="72" r="16" fill="#0F172A" class="ring" stroke="#F6B13E" stroke-width="3"/><text x="560" y="77" text-anchor="middle" font-size="14" fill="#F6B13E">✦</text><text x="560" y="40" text-anchor="middle" font-size="13" font-weight="600">Стандартні свічки</text></g>
+        <g class="st" data-go="z3" tabindex="0" role="link" aria-label="Зона 3"><circle cx="820" cy="110" r="16" fill="#0F172A" class="ring" stroke="#E35BD8" stroke-width="3"/><text x="820" y="115" text-anchor="middle" font-size="14" fill="#E35BD8">⋈</text><text x="820" y="152" text-anchor="middle" font-size="13" font-weight="600">Космічна павутина</text></g>
+        <g class="st" data-go="z4" tabindex="0" role="link" aria-label="Зона 4"><circle cx="1060" cy="80" r="16" fill="#0F172A" class="ring" stroke="#33D695" stroke-width="3"/><text x="1060" y="85" text-anchor="middle" font-size="13" fill="#33D695">◎</text><text x="1060" y="48" text-anchor="middle" font-size="13" font-weight="600">Паспорт</text></g>
+        <text class="scale" x="24" y="182" text-anchor="start">384 400 км</text>
+        <text class="scale" x="170" y="182" text-anchor="middle">1 а. о.</text>
+        <text class="scale" x="300" y="182" text-anchor="middle">1,3 пк</text>
+        <text class="scale" x="560" y="182" text-anchor="middle">~100 млн св. р.</text>
+        <text class="scale" x="820" y="182" text-anchor="middle">520 млн св. р.</text>
+        <text class="scale" x="1080" y="182" text-anchor="end">46 млрд св. р.</text>
+      </svg>
+    </div>
+  </header>
+
+  <!-- ============ ZONE 0 ============ -->
+  <section class="zone" data-z="0" id="z0">
+    <div class="zhead">
+      <div><div class="tag">Зона 0 · 00:00–00:05</div><h2>Стартовий хаб</h2><p class="goal">Вхід у тему, перевірка зв'язку, розрізняємо одиницю та метод.</p></div>
+    </div>
+    <div class="grid">
+      <div class="card c12">
+        <div class="num">01 · ТРЕКЕР ГОТОВНОСТІ</div>
+        <h3>Перетягни свою зірку в сузір'я, яке зараз про тебе</h3>
+        <div class="tray" data-drop id="moodDock" aria-label="Зірки екіпажу"></div>
+        <div class="consts" id="moodConsts">
+          <div class="const"><div class="ch">🚀 Готовий злетіти</div><div class="in" data-drop data-mood="0"></div></div>
+          <div class="const"><div class="ch">🔭 Цікаво, але туманно</div><div class="in" data-drop data-mood="1"></div></div>
+          <div class="const"><div class="ch">🌙 Трохи сонний</div><div class="in" data-drop data-mood="2"></div></div>
+          <div class="const"><div class="ch">❓ Маю питання</div><div class="in" data-drop data-mood="3"></div></div>
+        </div>
+        <div class="row"><button class="btn sm" id="moodReset">Повернути всі зірки</button><span class="muted" style="font-size:13px">Імена зірок змінюються в панелі «Екіпаж».</span></div>
+      </div>
+
+      <div class="card c12" id="sortGame">
+        <div class="num">02 · МІКРО-ГРА</div>
+        <div class="row" style="justify-content:space-between"><h3>Одиниця чи метод?</h3><span class="hint">Кілограм ≠ ваги!</span></div>
+        <div class="tray" data-drop id="sortTray"></div>
+        <div class="baskets">
+          <div class="basket" data-drop data-bin="u"><div class="bh">📦 ОДИНИЦЯ <span class="muted" style="font-family:var(--body);font-size:12px">лінійка</span></div><div class="in" data-drop data-bin="u"></div></div>
+          <div class="basket" data-drop data-bin="m"><div class="bh">🛠️ МЕТОД <span class="muted" style="font-family:var(--body);font-size:12px">спосіб виміряти</span></div><div class="in" data-drop data-bin="m"></div></div>
+        </div>
+        <div class="row"><button class="btn solid sm" id="sortCheck">Перевірити</button><button class="btn sm" id="sortReset">Перемішати</button><span class="verdict" id="sortV"></span></div>
+        <div class="quiz" data-answer="1" data-explain="Відстань, яку світло проходить за рік ≈ 9,46·10¹⁵ м ≈ 63 241 а. о.">
+          <div class="q">Бонус: світловий рік — це…</div>
+          <div class="opts"><button class="opt">час</button><button class="opt">відстань</button><button class="opt">швидкість</button></div>
+          <div class="fb"></div>
+        </div>
+      </div>
+    </div>
+    <details class="teacher"><summary>ДЛЯ ВИКЛАДАЧА</summary><ul>
+      <li><b>Скажіть:</b> «Як виміряти відстань до того, до чого не прикладеш лінійку?»</li>
+      <li>Відповіді гри: одиниці — км, а. о., світловий рік, парсек; методи — радар, паралакс, цефеїди, наднові Ia.</li>
+      <li>Типова пастка: «парсек» як метод (через «паралакс» у назві) та світловий рік як час.</li>
+      <li>Роздайте «Космічні паспорти» одразу.</li></ul></details>
+  </section>
+
+  <!-- ============ ZONE 1 ============ -->
+  <section class="zone" data-z="1" id="z1">
+    <div class="zhead">
+      <div><div class="tag">Зона 1 · 00:05–00:20</div><h2>Паралакс і геометрія зір</h2><p class="goal">Відчути паралакс на власних очах, побачити його на орбіті Землі й порахувати відстані за формулою.</p></div>
+    </div>
+    <div class="grid">
+      <div class="card c7">
+        <div class="num">01 · МІКРО-ЕКСПЕРИМЕНТ</div>
+        <h3>Паралакс на пальці</h3>
+        <ol class="muted" style="margin:0;padding-left:18px"><li>Витягни руку з пальцем.</li><li>Закривай очі по черзі.</li><li>Наблизь палець до носа — стрибок більший!</li></ol>
+        <div class="svgbox"><svg viewBox="0 0 600 200" id="fingerSvg" aria-label="Симуляція: палець на тлі дошки"></svg></div>
+        <div class="row"><button class="btn sm" id="eyeBtn">👁 Ліве око</button><label class="row" style="gap:6px;font-size:14px"><input type="checkbox" id="blink"> моргати самому</label></div>
+        <label style="font-size:14px">Палець від очей: <b class="mono" id="fingerD">30 см</b><input type="range" id="fingerR" min="12" max="65" value="30"></label>
+        <div class="out" id="fingerOut"></div>
+      </div>
+      <div class="card c5">
+        <div class="num">СТІКЕРИ КЛАСУ</div>
+        <div class="quiz" data-answer="0" data-explain="Чим ближчий предмет, тим більший кут зміщення на тлі далеких. Ліве і праве око — це «січень» і «липень».">
+          <div class="q">Що змінилося, коли палець наблизився?</div>
+          <div class="opts"><button class="opt">Кут зміщення зріс</button><button class="opt">Кут зменшився</button><button class="opt">Нічого</button></div>
+          <div class="fb"></div>
+        </div>
+        <div class="quiz" data-answer="2" data-explain="Ліве і праве око = Земля в січні та липні. Дошка = далекі зорі на тлі.">
+          <div class="q">Що в досліді грає роль Землі в січні та липні?</div>
+          <div class="opts"><button class="opt">Палець</button><button class="opt">Дошка</button><button class="opt">Ліве і праве око</button></div>
+          <div class="fb"></div>
+        </div>
+        <div class="quiz" data-answer="1" data-explain="Щоб помітити зміщення дуже далекого об'єкта, потрібна більша база.">
+          <div class="q">Як помітити зміщення дуже далекого предмета?</div>
+          <div class="opts"><button class="opt">Стати ближче одне до одного</button><button class="opt">Розійтися далі — збільшити базу</button></div>
+          <div class="fb"></div>
+        </div>
+      </div>
+
+      <div class="card c12">
+        <div class="num">02 · АСТРОНОМІЧНА СХЕМА</div>
+        <div class="row" style="justify-content:space-between"><h3>Орбіта Землі — база 2 а. о.</h3><span class="muted" style="font-size:13px">Схема не в масштабі: насправді кут у тисячі разів менший</span></div>
+        <div class="svgbox"><svg viewBox="0 0 680 300" id="orbitSvg" aria-label="Річний паралакс: Земля обертається, близька зоря зміщується на тлі далеких"></svg></div>
+        <div class="row">
+          <button class="btn sm" id="orbitPlay">▶ Запустити Землю</button>
+          <button class="btn sm" id="orbitJan">Січень</button><button class="btn sm" id="orbitJul">Липень</button>
+          <label style="flex:1 1 220px;font-size:14px">Відстань до зорі: <b class="mono" id="orbitDL">2 пк</b><input type="range" id="orbitD" min="1" max="5" step="0.1" value="2"></label>
+        </div>
+        <div class="out" id="orbitOut"></div>
+        <p class="muted" style="font-size:14px"><b style="color:var(--fg)">Парсек</b> — відстань, з якої 1 а. о. видно під кутом 1″. 1 пк ≈ 3,26 св. р. ≈ 206 265 а. о. ≈ 3,09·10¹⁶ м. Назва: ПАРалакс + СЕКунда.</p>
+      </div>
+
+      <div class="card c6">
+        <div class="num">03 · ФОРМУЛЬНИЙ ЦЕНТР</div>
+        <div class="formula">d = 1 / p<small>d — у парсеках (пк), p — у кутових секундах (″); 1″ = 1/3600°</small></div>
+        <label style="font-size:14px">Калькулятор: паралакс p, ″<input type="number" id="calcP" step="0.001" min="0.001" value="0.1" style="width:100%;margin-top:4px"></label>
+        <div class="out" id="calcOut"></div>
+        <div class="num" style="margin-top:6px">ПРАКТИКА · ВВЕДИ СВОЮ ВІДПОВІДЬ</div>
+        <div class="task"><span class="dot" style="background:#FF6B7A"></span><div><b>Проксима Центавра</b> · p = 0,768″<input type="number" step="0.01" placeholder="d = ? пк" id="tProx"></div><button class="btn sm" data-chk="tProx" data-v="1.302">Перевірити</button></div>
+        <div class="task"><span class="dot" style="background:#5AA9FF"></span><div><b>Сіріус</b> · p = 0,379″<input type="number" step="0.01" placeholder="d = ? пк" id="tSir"></div><button class="btn sm" data-chk="tSir" data-v="2.639">Перевірити</button></div>
+        <div class="fb" id="taskFb"></div>
+      </div>
+
+      <div class="card c6">
+        <div class="num">04 · ГРАФІК d = 1/p</div>
+        <h3>Менший кут — більша відстань</h3>
+        <div class="svgbox"><svg viewBox="0 0 420 260" id="hypSvg" aria-label="Графік гіперболи d = 1/p з трьома зорями"></svg></div>
+        <label style="font-size:14px">Рухай кут p: <b class="mono" id="hypPL"></b><input type="range" id="hypP" min="0.12" max="1" step="0.01" value="0.5"></label>
+        <div class="quiz" data-answer="2" data-explain="d = 1/p: кут удвічі менший — відстань удвічі більша. Тому далекі зорі міряти найважче.">
+          <div class="q">Кут p зменшився удвічі — що сталося з d? <span class="muted" style="font-weight:400;font-size:13px">(голосуємо)</span></div>
+          <div class="opts" data-tally><button class="opt">Зменшилася удвічі</button><button class="opt">Не змінилася</button><button class="opt">Збільшилася удвічі</button><button class="opt">Збільшилася вчетверо</button></div>
+          <div class="fb"></div>
+        </div>
+      </div>
+
+      <div class="card c12">
+        <div class="num">05 · НАСКІЛЬКИ МАЛІ ЦІ КУТИ?</div>
+        <div class="grid">
+          <div class="c6 out" style="font-family:var(--body)"><b class="mono" style="font-size:22px">1″</b> = волосина (0,1 мм) з відстані <b>20 м</b><svg viewBox="0 0 300 30" style="display:block;width:100%;margin-top:8px"><circle cx="10" cy="15" r="5" fill="#3FE0F2"/><line x1="16" y1="15" x2="290" y2="15" stroke="#97A3C2" stroke-dasharray="4 4"/><line x1="290" y1="5" x2="290" y2="25" stroke="#E7ECF8" stroke-width="1"/></svg></div>
+          <div class="c6 out" style="font-family:var(--body)"><b class="mono" style="font-size:22px">0,00002″</b> = точність Gaia: волосина з <b>1000 км</b> (Київ → Варшава ≈ 690 км)<svg viewBox="0 0 300 30" style="display:block;width:100%;margin-top:8px"><circle cx="10" cy="15" r="5" fill="#3FE0F2"/><line x1="16" y1="15" x2="290" y2="15" stroke="#97A3C2" stroke-dasharray="1 7"/><line x1="290" y1="12" x2="290" y2="18" stroke="#E7ECF8" stroke-width=".5"/></svg></div>
+        </div>
+        <div class="quiz" data-answer="0" data-explain="Немає атмосфери, яка «тремтить» і розмиває зображення.">
+          <div class="q">Чому з космосу міряти кути легше?</div>
+          <div class="opts"><button class="opt">Немає атмосфери</button><button class="opt">Там ближче до зір</button><button class="opt">Там темніше вдень</button></div>
+          <div class="fb"></div>
+        </div>
+      </div>
+    </div>
+    <details class="teacher"><summary>ДЛЯ ВИКЛАДАЧА</summary><ul>
+      <li>00:05–00:10 — досвід з пальцем; 00:10–00:20 — орбіта, формула, задачі.</li>
+      <li>Кассіні та Ріше, 1672: паралакс Марса з Парижа й Каєнни → а. о. ≈ 140 млн км (сучасне 149,6).</li>
+      <li>Відповіді: Проксима 1/0,768 ≈ 1,30 пк ≈ 4,24 св. р.; Сіріус 1/0,379 ≈ 2,64 пк ≈ 8,6 св. р.</li>
+      <li>Типова помилка — множити замість ділити. «Менший кут → більша відстань: p у знаменнику».</li>
+      <li>61 Лебедя: p ≈ 0,286″ → 3,5 пк (Бессель, 1838).</li></ul></details>
+  </section>
+
+  <!-- ============ ZONE 2 ============ -->
+  <section class="zone" data-z="2" id="z2">
+    <div class="zhead">
+      <div><div class="tag">Зона 2 · 00:20–00:35</div><h2>Стандартні свічки й драбина відстаней</h2><p class="goal">Закон обернених квадратів, цефеїди та наднові, пастка пилу і як методи калібрують один одного.</p></div>
+    </div>
+    <div class="grid">
+      <div class="card c7">
+        <div class="num">01 · ЗАКОН ОБЕРНЕНИХ КВАДРАТІВ</div>
+        <h3>Удвічі далі — учетверо тьмяніше</h3>
+        <div class="svgbox"><svg viewBox="0 0 560 230" id="isqSvg" aria-label="Ліхтарик освітлює екран: що далі, то більша пляма й тьмяніша кожна клітинка"></svg></div>
+        <label style="font-size:14px">Відстань екрана: <b class="mono" id="isqL">1 d</b><input type="range" id="isqR" min="1" max="4" step="1" value="1"></label>
+        <div class="out" id="isqOut"></div>
+      </div>
+      <div class="card c5">
+        <div class="num">ЧЕЛЕНДЖ</div>
+        <div class="quiz" data-answer="1" data-explain="E ∝ 1/d². Тьмяніша в 9 разів → далі у √9 = 3 рази. Перевірка: 3² = 9.">
+          <div class="q">Однакові свічки. Одна у 9 разів тьмяніша. У скільки разів вона далі?</div>
+          <div class="opts" data-tally><button class="opt">у 9 разів</button><button class="opt">у 3 рази</button><button class="opt">у 81 раз</button><button class="opt">у 4,5 раза</button></div>
+          <div class="fb"></div>
+        </div>
+        <div class="quiz" data-answer="0" data-explain="√4 = 2.">
+          <div class="q">А якщо в 4 рази тьмяніша?</div>
+          <div class="opts"><button class="opt">у 2 рази</button><button class="opt">у 4 рази</button><button class="opt">у 16 разів</button></div>
+          <div class="fb"></div>
+        </div>
+      </div>
+
+      <div class="card c7">
+        <div class="num">02 · КОСМІЧНІ ЛІХТАРІ · ЦЕФЕЇДИ</div>
+        <h3>Період пульсації → справжня яскравість</h3>
+        <div class="svgbox"><svg viewBox="0 0 560 200" id="cephSvg" aria-label="Пульсуюча цефеїда та її крива блиску"></svg></div>
+        <label style="font-size:14px">Період пульсації: <b class="mono" id="cephPL"></b><input type="range" id="cephP" min="1" max="50" step="0.5" value="5.4"></label>
+        <div class="out" id="cephOut"></div>
+        <p class="muted" style="font-size:13px">Генрієтта Лівітт, 1912: чим довший період, тим більша світність. δ Цефея пульсує з періодом ≈ 5,37 доби. Крива — схема, не реальні дані.</p>
+      </div>
+      <div class="card c5">
+        <div class="num">НАДНОВІ Ia</div>
+        <h3>Однаковий спалах — видно здалеку</h3>
+        <div class="svgbox" style="aspect-ratio:16/9;display:grid;place-items:center;position:relative" id="snBox">
+          <svg viewBox="0 0 300 170" aria-label="Галактика зі спалахом наднової">
+            <ellipse cx="150" cy="85" rx="110" ry="34" fill="none" stroke="#3B4B75" stroke-width="18" opacity=".5" transform="rotate(-12 150 85)"/>
+            <ellipse cx="150" cy="85" rx="60" ry="18" fill="#2B395D" transform="rotate(-12 150 85)"/>
+            <circle cx="150" cy="85" r="10" fill="#FFE8B0" opacity=".8"/>
+            <circle id="snFlash" cx="210" cy="62" r="4" fill="#fff"/>
+          </svg>
+        </div>
+        <button class="btn sm" id="snBtn">💥 Вибух білого карлика</button>
+        <p class="muted" style="font-size:14px">Пік світності майже однаковий у всіх наднових Ia — у мільярди разів яскравіші за Сонце, тож видно за мільярди світлових років.</p>
+        <div class="quiz" data-answer="1" data-explain="Вони набагато яскравіші за цефеїди, тому їх видно в дуже далеких галактиках.">
+          <div class="q">Чому для дуже далеких галактик беремо наднові, а не цефеїди?</div>
+          <div class="opts"><button class="opt">Вони ближчі</button><button class="opt">Вони набагато яскравіші</button><button class="opt">Вони пульсують</button></div>
+          <div class="fb"></div>
+        </div>
+      </div>
+
+      <div class="card c6">
+        <div class="num">03 · ІНТЕРАКТИВНА ПАСТКА</div>
+        <h3>Космічний пил</h3>
+        <div class="svgbox"><svg viewBox="0 0 420 200" id="dustSvg" aria-label="Зоря за шаром пилу"></svg></div>
+        <label style="font-size:14px">Товщина пилу: <b class="mono" id="dustL"></b><input type="range" id="dustR" min="0" max="2.5" step="0.1" value="1.2"></label>
+        <div class="row"><button class="btn sm" id="dustLift">🧹 Підняти шар пилу</button></div>
+        <div class="out" id="dustOut"></div>
+        <div class="quiz" data-answer="0" data-explain="Пил робить зорю тьмянішою → вона здається далі, ніж є → потрібна поправка на поглинання.">
+          <div class="q">Якщо забути про пил, відстань вийде…</div>
+          <div class="opts" data-tally><button class="opt">більшою за справжню</button><button class="opt">меншою за справжню</button><button class="opt">такою самою</button></div>
+          <div class="fb"></div>
+        </div>
+      </div>
+
+      <div class="card c6" id="ladderGame">
+        <div class="num">04 · ПАЗЛ</div>
+        <h3>Збери драбину космічних відстаней</h3>
+        <p class="muted" style="font-size:14px">Від найближчого (внизу) до найдальшого (вгорі).</p>
+        <div class="ladder" id="ladder"></div>
+        <div class="tray" data-drop id="ladderTray"></div>
+        <div class="row"><button class="btn solid sm" id="ladderCheck">Перевірити</button><button class="btn sm" id="ladderReset">Перемішати</button><span class="verdict" id="ladderV"></span></div>
+        <span class="flag">Кожен щабель калібрує наступний!</span>
+      </div>
+    </div>
+    <details class="teacher"><summary>ДЛЯ ВИКЛАДАЧА</summary><ul>
+      <li>00:20–00:28 — ліхтарик на стіну з 1, 2, 3 кроків; цефеїди Лівітт; челендж (відповідь: у 3 рази).</li>
+      <li>00:28–00:35 — пил (поясніть через склянки з каламутною водою із заняття 3), драбина.</li>
+      <li>Найчастіша помилка в тесті: «пил → здається ближчою». Правильно: далі.</li>
+      <li>«Що станеться з верхніми щаблями, якщо помилимося на нижньому?» — помилка переходить угору.</li></ul></details>
+  </section>
+
+  <!-- ============ ZONE 3 ============ -->
+  <section class="zone" data-z="3" id="z3">
+    <div class="zhead">
+      <div><div class="tag">Зона 3 · 00:35–00:50</div><h2>Розширення Всесвіту й космічна павутина</h2><p class="goal">Чим далі галактика, тим швидше віддаляється; Всесвіт — павутина ниток, вузлів і войдів, і центру в ній немає.</p></div>
+    </div>
+    <div class="grid">
+      <div class="card c7">
+        <div class="num">01 · СИМУЛЯЦІЯ</div>
+        <h3>Всесвіт-кулька</h3>
+        <div class="svgbox"><svg viewBox="-160 -150 320 300" id="balSvg" aria-label="Кулька з галактиками A, B, C, D розширюється"></svg></div>
+        <label style="font-size:14px">Надуваємо: <b class="mono" id="balL"></b><input type="range" id="balR" min="1" max="2.2" step="0.01" value="2"></label>
+        <div class="row"><span style="font-size:14px">Я живу в галактиці:</span><span class="seg" id="obsSeg"><button aria-pressed="true">A</button><button>B</button><button>C</button><button>D</button></span><button class="btn sm" id="balPlay">🎈 Надути з нуля</button></div>
+      </div>
+      <div class="card c5">
+        <div class="num">ВІДСТАНІ ВІД <span id="obsName">A</span>, СМ</div>
+        <div class="svgbox"><svg viewBox="0 0 300 170" id="barSvg" aria-label="Стовпчикова діаграма відстаней до і після"></svg></div>
+        <p style="font-size:14px"><b style="color:var(--z3)">Висновок:</b> чим далі галактика, тим більше вона віддалилася за той самий час — тобто швидше. Закон Габбла: v = H₀·d.</p>
+        <p class="muted" style="font-size:13px">Розміри крапок не змінюються: галактики тримає гравітація, вони не розширюються.</p>
+      </div>
+
+      <div class="card c12">
+        <div class="num">02 · ПОШУК У КОСМІЧНІЙ ПАВУТИНІ · ТАЙМЕР 40 С</div>
+        <div class="row" style="justify-content:space-between"><h3>Постав мітки: нитка, вузол, войд</h3><span class="muted" style="font-size:13px">Схематична модель за мотивами IllustrisTNG / Millennium</span></div>
+        <div class="markers" id="markers">
+          <button class="mk" data-k="f" aria-pressed="true"><i style="background:#FFD34D"></i>Нитка (філамент)</button>
+          <button class="mk" data-k="n" aria-pressed="false"><i style="background:#FF5468"></i>Вузол (скупчення)</button>
+          <button class="mk" data-k="v" aria-pressed="false"><i style="background:#4FB2FF"></i>Войд (порожнеча)</button>
+        </div>
+        <div class="svgbox"><canvas id="web" width="1000" height="560" aria-label="Карта космічної павутини: натисни, щоб поставити мітку"></canvas></div>
+        <div class="row">
+          <button class="btn solid sm" data-timer="40">⏱ Старт 40 с</button>
+          <button class="btn sm" id="webCheck">Перевірити мітки</button>
+          <button class="btn sm" id="webSkel">Показати каркас</button>
+          <button class="btn sm" id="webLan">Де Ланіакея?</button>
+          <button class="btn sm" id="webUndo">↶ Прибрати останню</button>
+          <button class="btn sm" id="webNew">Нова павутина</button>
+        </div>
+        <div class="out" id="webOut">Обери тип мітки й натискай на карту.</div>
+      </div>
+
+      <div class="card c12">
+        <div class="num">03 · ДИСКУСІЙНИЙ МАЙДАНЧИК</div>
+        <h3>Ми в центрі Всесвіту?</h3>
+        <p class="muted">Перемкни «Я живу в галактиці» на кульці вище: з будь-якої крапки здається, що всі тікають саме від тебе.</p>
+        <div class="quiz" data-answer="2" data-explain="Розширюється сам простір, всюди одночасно. Кожен спостерігач бачить те саме — центру немає. (А де центр поверхні кульки? На поверхні — ніде.)">
+          <div class="q">Де центр Всесвіту?</div>
+          <div class="opts" data-tally><button class="opt">У Чумацькому Шляху</button><button class="opt">У точці Великого вибуху</button><button class="opt">Ніде / всюди</button></div>
+          <div class="fb"></div>
+        </div>
+      </div>
+    </div>
+    <details class="teacher"><summary>ДЛЯ ВИКЛАДАЧА</summary><ul>
+      <li>00:35–00:42 — кульки в групах: кнопка «Пари для кульки» в панелі «Екіпаж» ділить 11 учнів на 4 пари й 1 трійку.</li>
+      <li>00:42–00:50 — запускайте таймер 40 с, потім «Перевірити мітки» і «Показати каркас».</li>
+      <li>Ланіакея ≈ 520 млн св. р., ≈ 100 000 галактик — лише одна клітинка павутини.</li>
+      <li>Межа аналогії: у кульки є «всередині», а у Всесвіту немає «зовні».</li></ul></details>
+  </section>
+
+  <!-- ============ ZONE 4 ============ -->
+  <section class="zone" data-z="4" id="z4">
+    <div class="zhead">
+      <div><div class="tag">Зона 4 · 00:50–01:00</div><h2>Паспорт, бліц і фінал курсу</h2><p class="goal">Пройти свою космічну адресу, перевірити себе й залишити думку на прощання.</p></div>
+    </div>
+    <div class="grid">
+      <div class="card c12">
+        <div class="num">01 · КОСМІЧНИЙ ПАСПОРТ · 3 ХВ</div>
+        <div class="row" style="justify-content:space-between">
+          <h3>Моя космічна адреса</h3>
+          <div class="row"><select id="passWho" aria-label="Чий паспорт"></select><button class="btn solid sm" data-timer="180">⏱ 3 хв</button></div>
+        </div>
+        <p class="muted" style="font-size:14px">На кожному рівні обери відстань, одиницю й метод. Оцінюємо логіку: правильний порядок величини — уже перемога.</p>
+        <div class="phead eyebrow"><span>Рівень</span><span>Відстань</span><span>Одиниця</span><span>Метод</span></div>
+        <div class="pass" id="pass"></div>
+        <div class="row"><button class="btn solid sm" id="passCheck">Перевірити паспорт</button><button class="btn sm" id="passReset">Очистити</button><span class="verdict" id="passV"></span></div>
+      </div>
+
+      <div class="card c8">
+        <div class="num">02 · БЛІЦ-СТІНА</div>
+        <div class="row" style="justify-content:space-between"><h3>Натисни картку — побачиш відповідь</h3><button class="btn sm" id="blitzMore">🎲 Ще питання</button></div>
+        <div class="blitz" id="blitz"></div>
+      </div>
+      <div class="card c4">
+        <div class="num">KAHOOT!</div>
+        <label style="font-size:14px">PIN або посилання гри<input type="text" id="kahootIn" placeholder="напр. 1234567" style="width:100%;margin-top:4px"></label>
+        <div id="kahootBig" class="mono" style="font-size:28px;text-align:center;color:var(--z4)"></div>
+        <div style="display:grid;place-items:center"><div id="qr" style="background:#fff;border-radius:8px;line-height:0"></div></div>
+        <p class="muted" style="font-size:13px">Учні відкривають kahoot.it і вводять PIN або скануюють код.</p>
+      </div>
+
+      <div class="card c6">
+        <div class="num">03 · КЛЮЧОВІ ПИТАННЯ ЗАНЯТТЯ</div>
+        <h3>Постав «+» або «?» навпроти кожного</h3>
+        <div class="check4" id="check4"></div>
+        <div class="out" id="check4Out"></div>
+      </div>
+      <div class="card c6">
+        <div class="num">04 · ФІЛОСОФСЬКИЙ КУТОК</div>
+        <p class="quote">«Ми — спосіб, яким Всесвіт пізнає себе»</p>
+        <p class="muted">Карл Саган, «Космос», 1980</p>
+        <div class="out" style="font-family:var(--body)"><b>Питання на прощання:</b> що лежить за межею спостережуваного Всесвіту — і чи зможемо ми колись це дізнатися?</div>
+        <div><div class="eyebrow" style="margin-bottom:6px">Оцінка заняття</div><div class="rate" id="rate"></div></div>
+      </div>
+
+      <div class="card c12">
+        <div class="num">05 · СТІНА ФІНАЛЬНИХ ДУМОК</div>
+        <div class="row">
+          <select id="noteWho" aria-label="Хто пише"></select>
+          <input type="text" id="noteIn" placeholder="Моя думка: що там, за межею?" style="flex:1 1 240px">
+          <button class="btn solid sm" id="noteAdd">Приклеїти</button>
+        </div>
+        <div class="wall" id="wall"></div>
+      </div>
+    </div>
+    <details class="teacher"><summary>ДЛЯ ВИКЛАДАЧА</summary><ul>
+      <li>00:50–00:56 — паспорт (3 хв таймер) і Kahoot; 00:56–01:00 — Саган і питання на прощання.</li>
+      <li>Не відповідайте на останнє питання — залиште інтригу. Запросіть на гурток.</li>
+      <li>Паспорти учні забирають додому.</li></ul></details>
+  </section>
+</main>
+
+<footer class="wrap">© Дарина Проволовська · Наше місце у Всесвіті · заняття 5</footer>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-label="Екіпаж">
+  <div class="row" style="justify-content:space-between"><h2 style="font-size:20px">Екіпаж · 11</h2><button class="btn sm" id="crewClose">✕</button></div>
+  <div class="scroll">
+    <div class="pick" id="pick">Хто відповідає?</div>
+    <div class="row"><button class="btn solid sm" id="pickBtn" style="--zc:var(--z2)">🎲 Обрати зірку</button><span class="muted" style="font-size:13px" id="pickLeft"></span></div>
+    <div class="row"><button class="btn sm" id="pairBtn">🎈 Пари для кульки</button><button class="btn sm" data-timer="40">40 с</button><button class="btn sm" data-timer="180">3 хв</button><button class="btn sm" data-timer="300">5 хв</button></div>
+    <div class="groups" id="groups"></div>
+    <div class="eyebrow">Імена та бали</div>
+    <div class="crew" id="crew"></div>
+    <div class="row"><button class="btn sm" id="ptsReset">Обнулити бали</button><button class="btn sm" id="allReset">Скинути всю дошку</button></div>
+    <p class="muted" style="font-size:12px">Усе зберігається лише в цьому браузері.</p>
+  </div>
+</aside>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+(()=>{
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const NS='http://www.w3.org/2000/svg';
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const fmt=(x,d=2)=>x.toLocaleString('uk-UA',{minimumFractionDigits:d,maximumFractionDigits:d});
+const shuffle=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+
+/* ---------- storage ---------- */
+const KEY='kosmag5';
+let S={};
+try{S=JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(e){S={}}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const STARS=['Вега','Сіріус','Альтаїр','Арктур','Капела','Рігель','Денеб','Антарес','Бетельгейзе','Альдебаран','Полярна'];
+const HUES=['#7FB2FF','#9EE7FF','#FFD36B','#FF9E5E','#FFE9A3','#A8C8FF','#E0E8FF','#FF6B6B','#FF8A5C','#FFB36B','#C9F0FF'];
+S.names=S.names&&S.names.length===11?S.names:[...STARS];
+S.pts=S.pts&&S.pts.length===11?S.pts:Array(11).fill(0);
+S.mood=S.mood||{};S.notes=S.notes||[];
+const nm=i=>S.names[i]||STARS[i];
+
+/* ---------- starfield ---------- */
+const sky=$('#sky');
+function drawSky(){const d=devicePixelRatio||1,w=innerWidth,h=innerHeight;sky.width=w*d;sky.height=h*d;const c=sky.getContext('2d');c.scale(d,d);c.fillStyle='#0F172A';c.fillRect(0,0,w,h);
+  const g=c.createRadialGradient(w*.85,h*.1,0,w*.85,h*.1,w*.6);g.addColorStop(0,'rgba(227,91,216,.07)');g.addColorStop(1,'transparent');c.fillStyle=g;c.fillRect(0,0,w,h);
+  const g2=c.createRadialGradient(w*.1,h*.9,0,w*.1,h*.9,w*.5);g2.addColorStop(0,'rgba(63,224,242,.05)');g2.addColorStop(1,'transparent');c.fillStyle=g2;c.fillRect(0,0,w,h);
+  let seed=7;const r=()=>(seed=(seed*16807)%2147483647)/2147483647;
+  for(let i=0;i<w*h/2500;i++){const x=r()*w,y=r()*h,s=r();c.fillStyle=`rgba(230,236,248,${.15+s*.6})`;c.beginPath();c.arc(x,y,s<.93?.6:1.3,0,7);c.fill()}}
+drawSky();addEventListener('resize',drawSky);
+
+/* ---------- route links ---------- */
+$$('#routeSvg .st').forEach(g=>{const go=()=>document.getElementById(g.dataset.go).scrollIntoView({block:'start'});g.addEventListener('click',go);g.addEventListener('keydown',e=>{if(e.key==='Enter')go()})});
+
+/* ---------- beep ---------- */
+let actx=null;function beep(){try{actx=actx||new AudioContext();[0,.25,.5].forEach(t=>{const o=actx.createOscillator(),g=actx.createGain();o.frequency.value=880;o.connect(g);g.connect(actx.destination);g.gain.setValueAtTime(.15,actx.currentTime+t);g.gain.exponentialRampToValueAtTime(.001,actx.currentTime+t+.2);o.start(actx.currentTime+t);o.stop(actx.currentTime+t+.22)})}catch(e){}}
+
+/* ---------- timer ---------- */
+const tEl=$('#timer');let tEnd=0,tInt=null;
+const mmss=s=>String(Math.floor(s/60)).padStart(2,'0')+':'+String(Math.floor(s%60)).padStart(2,'0');
+function startTimer(sec){try{actx=actx||new AudioContext()}catch(e){}tEnd=Date.now()+sec*1000;tEl.className='timer run';clearInterval(tInt);
+  const tick=()=>{const left=Math.max(0,(tEnd-Date.now())/1000);tEl.textContent='⏱ '+mmss(Math.ceil(left));if(left<=0){clearInterval(tInt);tEl.className='timer done';tEl.textContent='⏱ Час!';beep()}};tick();tInt=setInterval(tick,250)}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-timer]');if(b)startTimer(+b.dataset.timer)});
+tEl.addEventListener('click',()=>{clearInterval(tInt);tEl.className='timer';tEl.textContent='⏱ --:--'});
+
+/* ---------- lesson clock ---------- */
+const SCHED=[[0,5],[5,20],[20,35],[35,50],[50,60]];
+let lStart=S.lStart||0,lInt=null;
+function lessonTick(){const el=lStart?(Date.now()-lStart)/1000:0;$('#lessonT').textContent=mmss(el);
+  const m=el/60;$('#needle').style.left=`calc(${Math.min(m/60,1)*100}% - 1px)`;
+  $$('#track a').forEach((a,i)=>a.classList.toggle('now',!!lStart&&m>=SCHED[i][0]&&m<SCHED[i][1]))}
+function setLesson(on){if(on){lStart=lStart||Date.now();S.lStart=lStart;clearInterval(lInt);lInt=setInterval(lessonTick,1000);$('#lessonBtn').textContent='■ Стоп'}else{lStart=0;delete S.lStart;clearInterval(lInt);$('#lessonBtn').textContent='▶ Старт'}save();lessonTick()}
+$('#lessonBtn').addEventListener('click',()=>setLesson(!lStart));
+if(lStart&&Date.now()-lStart<3*3600e3)setLesson(true);else{lStart=0;lessonTick()}
+
+/* ---------- drag & drop (pointer + tap) ---------- */
+let selChip=null;
+function dnd(root,onDrop){
+  let dr=null;
+  root.addEventListener('pointerdown',e=>{const chip=e.target.closest('.chip');if(!chip||!root.contains(chip)||e.button>0)return;dr={chip,x:e.clientX,y:e.clientY,moved:false,g:null,hot:null};try{chip.setPointerCapture(e.pointerId)}catch(_){}});
+  root.addEventListener('pointermove',e=>{if(!dr)return;if(!dr.moved&&Math.hypot(e.clientX-dr.x,e.clientY-dr.y)>6){dr.moved=true;dr.g=dr.chip.cloneNode(true);dr.g.classList.add('ghost');dr.g.classList.remove('sel','ok','bad');document.body.append(dr.g);dr.chip.classList.add('lifted')}
+    if(dr.moved){e.preventDefault();dr.g.style.left=e.clientX+'px';dr.g.style.top=e.clientY+'px';const t=document.elementFromPoint(e.clientX,e.clientY)?.closest('[data-drop]');const ok=t&&root.contains(t)?t:null;if(dr.hot!==ok){dr.hot?.classList.remove('hot');ok?.classList.add('hot');dr.hot=ok}}});
+  const end=e=>{if(!dr)return;const d=dr;dr=null;
+    if(d.moved){d.g.remove();d.chip.classList.remove('lifted');d.hot?.classList.remove('hot');if(d.hot)place(d.chip,d.hot)}
+    else{if(selChip===d.chip){d.chip.classList.remove('sel');selChip=null}else{selChip?.classList.remove('sel');selChip=d.chip;d.chip.classList.add('sel')}}};
+  root.addEventListener('pointerup',end);root.addEventListener('pointercancel',e=>{if(dr?.g){dr.g.remove();dr.chip.classList.remove('lifted');dr.hot?.classList.remove('hot')}dr=null});
+  root.addEventListener('click',e=>{if(!selChip||!root.contains(selChip)||e.target.closest('.chip'))return;const t=e.target.closest('[data-drop]');if(t&&root.contains(t)){place(selChip,t);selChip.classList.remove('sel');selChip=null}});
+  function place(chip,t){const inner=t.querySelector(':scope > .in[data-drop]')||t;
+    if(inner.dataset.max==='1'){const ex=inner.querySelector('.chip');if(ex&&ex!==chip)chip.parentElement.append(ex)}
+    inner.append(chip);chip.classList.remove('ok','bad');onDrop&&onDrop(chip,inner)}
+}
+function mkChip(text,data={},cls=''){const b=document.createElement('div');b.className='chip '+cls;b.tabIndex=0;b.textContent=text;Object.assign(b.dataset,data);return b}
+
+/* ---------- mood ---------- */
+function renderMood(){const dock=$('#moodDock');dock.innerHTML='';$$('#moodConsts [data-mood]').forEach(z=>z.innerHTML='');
+  for(let i=0;i<11;i++){const c=mkChip(nm(i),{i},'star-tok');c.style.setProperty('--h',HUES[i]);const m=S.mood[i];(m!=null?$(`#moodConsts [data-mood="${m}"]`):dock).append(c)}}
+dnd($('#z0 .card'),(chip,t)=>{const i=chip.dataset.i;if(t.dataset.mood!=null)S.mood[i]=+t.dataset.mood;else delete S.mood[i];save()});
+$('#moodReset').addEventListener('click',()=>{S.mood={};save();renderMood()});
+renderMood();
+
+/* ---------- sort game ---------- */
+const SORT=[['км','u'],['радар','m'],['світловий рік','u'],['паралакс','m'],['парсек','u'],['цефеїди','m'],['а. о.','u'],['наднові Ia','m']];
+function sortReset(){$('#sortTray').innerHTML='';$$('#sortGame .basket .in').forEach(b=>b.innerHTML='');shuffle(SORT).forEach(([t,k])=>$('#sortTray').append(mkChip(t,{k})));$('#sortV').textContent='';$('#sortV').className='verdict'}
+dnd($('#sortGame'),()=>{$('#sortV').textContent=''});
+$('#sortReset').addEventListener('click',sortReset);
+$('#sortCheck').addEventListener('click',()=>{let ok=0;$$('#sortGame .basket .chip').forEach(c=>{const g=c.dataset.k===c.parentElement.dataset.bin;c.classList.toggle('ok',g);c.classList.toggle('bad',!g);ok+=g});const left=$$('#sortTray .chip').length;const v=$('#sortV');
+  if(ok===8){v.textContent='8 з 8 — бездоганно! ✨';v.className='verdict ok'}else{v.textContent=`${ok} з 8 правильно`+(left?` · ще ${left} у лотку`:'')+(ok<8?'. Підказка: парсек — одиниця, хоч і названий за методом.':'');v.className='verdict bad'}});
+sortReset();
+
+/* ---------- quizzes (with optional class tally) ---------- */
+$$('.quiz').forEach(q=>{const ans=+q.dataset.answer,opts=$$('.opt',q),fb=$('.fb',q);
+  const tal=q.querySelector('[data-tally]');
+  opts.forEach((o,i)=>{o.addEventListener('click',e=>{if(e.target.closest('.tally'))return;opts.forEach(x=>x.classList.remove('ok','bad'));o.classList.add(i===ans?'ok':'bad');if(i!==ans)opts[ans].classList.add('ok');fb.textContent=(i===ans?'Так! ':'Не зовсім. ')+(q.dataset.explain||'')});
+    if(tal){const t=document.createElement('span');t.className='tally';t.innerHTML='<button aria-label="мінус голос">−</button><b>0</b><button aria-label="плюс голос">+</button>';const w=document.createElement('span');w.className='ow';o.before(w);w.append(o,t);let n=0;const b=$('b',t);$$('button',t).forEach((bb,k)=>bb.addEventListener('click',ev=>{ev.stopPropagation();n=Math.max(0,Math.min(11,n+(k?1:-1)));b.textContent=n}))}})});
+
+/* ---------- svg helper ---------- */
+function el(tag,attrs={},parent){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);parent&&parent.append(e);return e}
+
+/* ---------- finger parallax ---------- */
+(function(){const svg=$('#fingerSvg');let eye=-1;
+  el('rect',{x:0,y:0,width:600,height:200,fill:'#13213A'},svg);
+  const marks=['А','Б','В','Г','Д','Е','Є','Ж','З','И','І','Ї'];marks.forEach((m,i)=>{const x=30+i*49;el('line',{x1:x,y1:20,x2:x,y2:180,stroke:'#22345A'},svg);const t=el('text',{x,y:30,'text-anchor':'middle','font-size':14,fill:'#64708F'},svg);t.textContent=m});
+  const tl=el('text',{x:12,y:194,'font-size':11,fill:'#64708F'},svg);tl.textContent='дошка (далекі зорі)';
+  const ghost=el('g',{opacity:.25},svg);el('rect',{x:-11,y:70,width:22,height:140,rx:11,fill:'#F2C9A0'},ghost);
+  const fg=el('g',{},svg);el('rect',{x:-11,y:70,width:22,height:140,rx:11,fill:'#F2C9A0'},fg);el('rect',{x:-7,y:76,width:14,height:16,rx:5,fill:'#FBE3CF'},fg);
+  const lbl=el('text',{x:300,y:58,'text-anchor':'middle','font-size':13,fill:'#3FE0F2'},svg);
+  function draw(){const d=+$('#fingerR').value;$('#fingerD').textContent=d+' см';const shift=1500/d;fg.setAttribute('transform',`translate(${300+eye*shift/2},0)`);ghost.setAttribute('transform',`translate(${300-eye*shift/2},0)`);
+    lbl.textContent=(eye<0?'ліве':'праве')+' око';const ang=2*Math.atan(3.25/d)*180/Math.PI;$('#fingerOut').innerHTML=`База між очима ≈ <b>6,5 см</b> · кут стрибка ≈ <b>${fmt(ang,1)}°</b> · стрибок на дошці ≈ <b>${Math.round(shift)} px</b>`}
+  $('#fingerR').addEventListener('input',draw);
+  $('#eyeBtn').addEventListener('click',()=>{eye=-eye;$('#eyeBtn').textContent=eye<0?'👁 Ліве око':'👁 Праве око';draw()});
+  let bi=null;$('#blink').addEventListener('change',e=>{clearInterval(bi);if(e.target.checked)bi=setInterval(()=>{eye=-eye;$('#eyeBtn').textContent=eye<0?'👁 Ліве око':'👁 Праве око';draw()},650)});draw()})();
+
+/* ---------- orbit parallax ---------- */
+(function(){const svg=$('#orbitSvg');const SX=110,SY=150,R=58,WALL=640;let th=-Math.PI/2,play=false,raf=0;
+  el('rect',{x:WALL,y:0,width:40,height:300,fill:'#13213A'},svg);
+  let s=3;const rr=()=>(s=(s*16807)%2147483647)/2147483647;for(let i=0;i<40;i++)el('circle',{cx:WALL+5+rr()*30,cy:rr()*300,r:.6+rr()*1.2,fill:'#97A3C2'},svg);
+  const wt=el('text',{x:WALL-6,y:16,'text-anchor':'end','font-size':11,fill:'#64708F'},svg);wt.textContent='далекі зорі (тло)';
+  el('circle',{cx:SX,cy:SY,r:R,fill:'none',stroke:'#2B395D','stroke-dasharray':'4 5'},svg);
+  el('circle',{cx:SX,cy:SY,r:14,fill:'#FFC94D'},svg);
+  const jan=el('text',{x:SX,y:SY-R-12,'text-anchor':'middle','font-size':12,fill:'#97A3C2'},svg);jan.textContent='січень';
+  const jul=el('text',{x:SX,y:SY+R+20,'text-anchor':'middle','font-size':12,fill:'#97A3C2'},svg);jul.textContent='липень';
+  const base=el('line',{x1:SX-26,y1:SY-R,x2:SX-26,y2:SY+R,stroke:'#3FE0F2','stroke-width':1,'marker-end':''},svg);
+  const bt=el('text',{x:SX-32,y:SY+4,'text-anchor':'end','font-size':12,fill:'#3FE0F2'},svg);bt.textContent='2 а. о.';
+  const lJ=el('line',{stroke:'#3FE0F2','stroke-width':1,opacity:.35},svg),lL=el('line',{stroke:'#3FE0F2','stroke-width':1,opacity:.35},svg);
+  const ray=el('line',{stroke:'#FFFFFF','stroke-width':1.4,'stroke-dasharray':'3 4'},svg);
+  const star=el('circle',{r:8,fill:'#FF7A6B'},svg);const sl=el('text',{'font-size':12,fill:'#FF7A6B','text-anchor':'middle'},svg);sl.textContent='близька зоря';
+  const pl=el('text',{'font-size':14,fill:'#3FE0F2','font-weight':700},svg);pl.textContent='p';
+  const img=el('circle',{r:5,fill:'#FF7A6B',stroke:'#fff','stroke-width':1.5},svg);
+  const imgJ=el('circle',{r:3,fill:'none',stroke:'#FF7A6B'},svg),imgL=el('circle',{r:3,fill:'none',stroke:'#FF7A6B'},svg);
+  const earth=el('circle',{r:7,fill:'#4C8DFF',stroke:'#BFD6FF','stroke-width':1.5},svg);
+  const proj=(ex,ey,sx)=>ey+(SY-ey)*(WALL-ex)/(sx-ex);
+  function draw(){const d=+$('#orbitD').value;const sx=SX+90+d*80;$('#orbitDL').textContent=fmt(d,1)+' пк';
+    star.setAttribute('cx',sx);star.setAttribute('cy',SY);sl.setAttribute('x',sx);sl.setAttribute('y',SY+24);pl.setAttribute('x',sx-30);pl.setAttribute('y',SY+5);
+    const ex=SX+R*Math.cos(th),ey=SY+R*Math.sin(th);earth.setAttribute('cx',ex);earth.setAttribute('cy',ey);
+    const wy=proj(ex,ey,sx);ray.setAttribute('x1',ex);ray.setAttribute('y1',ey);ray.setAttribute('x2',WALL);ray.setAttribute('y2',wy);img.setAttribute('cx',WALL+3);img.setAttribute('cy',wy);
+    const yJ=proj(SX,SY-R,sx),yL=proj(SX,SY+R,sx);
+    lJ.setAttribute('x1',SX);lJ.setAttribute('y1',SY-R);lJ.setAttribute('x2',WALL);lJ.setAttribute('y2',yJ);lL.setAttribute('x1',SX);lL.setAttribute('y1',SY+R);lL.setAttribute('x2',WALL);lL.setAttribute('y2',yL);
+    imgJ.setAttribute('cx',WALL+3);imgJ.setAttribute('cy',yJ);imgL.setAttribute('cx',WALL+3);imgL.setAttribute('cy',yL);
+    const p=1/d;$('#orbitOut').innerHTML=`d = <b>${fmt(d,1)} пк</b> → p = 1/d = <b>${fmt(p,3)}″</b> · ≈ <b>${fmt(d*3.26,1)} св. р.</b> · зміщення на тлі за пів року: <b>2p = ${fmt(2*p,3)}″</b>`}
+  function loop(){th+=0.025;draw();if(play)raf=requestAnimationFrame(loop)}
+  $('#orbitPlay').addEventListener('click',()=>{play=!play;$('#orbitPlay').textContent=play?'⏸ Пауза':'▶ Запустити Землю';if(play){if(reduce){play=false;$('#orbitPlay').textContent='▶ Запустити Землю';th+=Math.PI/4;draw()}else loop()}else cancelAnimationFrame(raf)});
+  $('#orbitJan').addEventListener('click',()=>{th=-Math.PI/2;draw()});$('#orbitJul').addEventListener('click',()=>{th=Math.PI/2;draw()});
+  $('#orbitD').addEventListener('input',draw);draw()})();
+
+/* ---------- calculator & tasks ---------- */
+function calc(){const p=parseFloat($('#calcP').value);const o=$('#calcOut');if(!(p>0)){o.textContent='Введи паралакс більший за 0';return}const d=1/p;o.innerHTML=`d = 1 / ${fmt(p,3)} = <b>${fmt(d,2)} пк</b> ≈ <b>${fmt(d*3.26,1)} св. р.</b>`}
+$('#calcP').addEventListener('input',calc);calc();
+$$('[data-chk]').forEach(b=>b.addEventListener('click',()=>{const inp=$('#'+b.dataset.chk),v=parseFloat(String(inp.value).replace(',','.')),t=+b.dataset.v,fb=$('#taskFb');
+  if(isNaN(v)){fb.textContent='Спершу введи відповідь.';return}
+  if(Math.abs(v-t)<=0.03){inp.style.borderColor='var(--ok)';fb.innerHTML=`<span style="color:var(--ok)">Так!</span> ${fmt(t,2)} пк ≈ ${fmt(t*3.26,2)} св. р.`}
+  else if(Math.abs(v-1/t)<0.05){inp.style.borderColor='var(--bad)';fb.textContent='Схоже, ти помножив замість поділити. Пам\'ятай: d = 1 / p.'}
+  else{inp.style.borderColor='var(--bad)';fb.textContent='Ще раз: поділи 1 на паралакс.'}}));
+
+/* ---------- hyperbola ---------- */
+(function(){const svg=$('#hypSvg'),L=46,R=405,T=14,B=226,pMin=.1,pMax=1,dMax=10;
+  const X=p=>L+(p-pMin)/(pMax-pMin)*(R-L),Y=d=>B-d/dMax*(B-T);
+  for(let d=0;d<=10;d+=2){el('line',{x1:L,x2:R,y1:Y(d),y2:Y(d),stroke:'#22345A'},svg);const t=el('text',{x:L-8,y:Y(d)+4,'text-anchor':'end','font-size':11,fill:'#97A3C2'},svg);t.textContent=d}
+  [.1,.2,.4,.6,.8,1].forEach(p=>{const t=el('text',{x:X(p),y:B+16,'text-anchor':'middle','font-size':11,fill:'#97A3C2'},svg);t.textContent=String(p).replace('.',',')});
+  const ax=el('text',{x:R,y:B-6,'text-anchor':'end','font-size':11,fill:'#64708F'},svg);ax.textContent='p, ″';
+  const ay=el('text',{x:L+4,y:T+10,'font-size':11,fill:'#64708F'},svg);ay.textContent='d, пк';
+  let path='';for(let p=pMin;p<=pMax+1e-9;p+=.005)path+=(path?'L':'M')+X(p).toFixed(1)+' '+Y(Math.min(1/p,dMax)).toFixed(1);
+  el('path',{d:path,fill:'none',stroke:'#3FE0F2','stroke-width':2.5},svg);
+  [['Проксима',.768,'#FF6B7A'],['Сіріус',.379,'#5AA9FF'],['61 Лебедя',.286,'#FFD36B']].forEach(([n,p,c])=>{el('circle',{cx:X(p),cy:Y(1/p),r:5,fill:c},svg);const t=el('text',{x:X(p)+8,y:Y(1/p)-6,'font-size':12,fill:c},svg);t.textContent=n});
+  const vl=el('line',{stroke:'#fff','stroke-dasharray':'3 3',opacity:.6},svg),hl=el('line',{stroke:'#fff','stroke-dasharray':'3 3',opacity:.6},svg),m=el('circle',{r:6,fill:'#fff'},svg),mt=el('text',{'font-size':12,fill:'#fff','font-weight':600},svg);
+  function draw(){const p=+$('#hypP').value,d=1/p;$('#hypPL').textContent=`p = ${fmt(p,2)}″ → d = ${fmt(d,2)} пк`;const x=X(p),y=Y(d);vl.setAttribute('x1',x);vl.setAttribute('x2',x);vl.setAttribute('y1',B);vl.setAttribute('y2',y);hl.setAttribute('x1',L);hl.setAttribute('x2',x);hl.setAttribute('y1',y);hl.setAttribute('y2',y);m.setAttribute('cx',x);m.setAttribute('cy',y);mt.setAttribute('x',x+10);mt.setAttribute('y',y+18);mt.textContent=fmt(d,1)+' пк'}
+  $('#hypP').addEventListener('input',draw);draw()})();
+
+/* ---------- inverse square ---------- */
+(function(){const svg=$('#isqSvg');const g=el('g',{},svg);
+  function draw(){const d=+$('#isqR').value;$('#isqL').textContent=d+' d';g.innerHTML='';
+    const fx=34,fy=115,step=100,sx=fx+step*d,cell=26,h=cell*d;
+    el('rect',{x:6,y:fy-12,width:30,height:24,rx:5,fill:'#3B4B75'},g);el('rect',{x:30,y:fy-8,width:8,height:16,fill:'#FFE8A3'},g);
+    el('path',{d:`M${fx+4} ${fy-6} L${sx} ${fy-h/2} L${sx} ${fy+h/2} L${fx+4} ${fy+6}Z`,fill:'#F6B13E',opacity:.12},g);
+    for(let k=1;k<=4;k++){const x=fx+step*k;el('line',{x1:x,x2:x,y1:20,y2:210,stroke:k===d?'#F6B13E':'#22345A','stroke-dasharray':k===d?'':'3 4'},g);const t=el('text',{x,y:224,'text-anchor':'middle','font-size':12,fill:'#97A3C2'},g);t.textContent=k+'d'}
+    const b=1/(d*d);for(let i=0;i<d;i++)for(let j=0;j<d;j++)el('rect',{x:sx+4+i*cell,y:fy-h/2+j*cell,width:cell-2,height:cell-2,fill:'#FFD36B',opacity:Math.max(.08,b),stroke:'#F6B13E','stroke-width':.6},g);
+    $('#isqOut').innerHTML=`Пляма: <b>${d*d}</b> клітин${d>1?'ок':'ка'} · яскравість однієї клітинки: <b>1/${d*d}</b> · E ∝ 1/d²`}
+  $('#isqR').addEventListener('input',draw);draw()})();
+
+/* ---------- cepheid ---------- */
+(function(){const svg=$('#cephSvg');const glow=el('circle',{cx:90,cy:100,r:50,fill:'#F6B13E',opacity:.15},svg),core=el('circle',{cx:90,cy:100,r:30,fill:'#FFD36B'},svg);
+  const L=180,R=545,T=24,B=170;el('line',{x1:L,y1:B,x2:R,y2:B,stroke:'#2B395D'},svg);el('line',{x1:L,y1:T,x2:L,y2:B,stroke:'#2B395D'},svg);
+  const xl=el('text',{x:R,y:B+18,'text-anchor':'end','font-size':11,fill:'#64708F'},svg);xl.textContent='час →';
+  const yl=el('text',{x:L+6,y:T+4,'font-size':11,fill:'#64708F'},svg);yl.textContent='блиск';
+  const curve=el('path',{fill:'none',stroke:'#F6B13E','stroke-width':2.5},svg),dot=el('circle',{r:5,fill:'#fff'},svg);
+  const shape=ph=>ph<.18?ph/.18:1-(ph-.18)/.82; // fast rise slow fade
+  let P=5.4,t0=performance.now();
+  function setP(){P=+$('#cephP').value;$('#cephPL').textContent=fmt(P,1)+' доби';let d='';const cyc=2;for(let i=0;i<=200;i++){const x=i/200,ph=(x*cyc)%1;d+=(i?'L':'M')+(L+x*(R-L)).toFixed(1)+' '+(B-10-shape(ph)*(B-T-30)).toFixed(1)}curve.setAttribute('d',d);
+    const M=-2.43*(Math.log10(P)-1)-4.05,Lsun=Math.pow(10,-.4*(M-4.83));$('#cephOut').innerHTML=`Період <b>${fmt(P,1)} доби</b> → світність ≈ <b>${Math.round(Lsun).toLocaleString('uk-UA')} Сонць</b> (закон Лівітт)`}
+  function frame(now){const sec=(now-t0)/1000,ph=(sec/(1.2+P*.08))%1,s=shape(ph);core.setAttribute('r',24+s*10);glow.setAttribute('r',38+s*22);glow.setAttribute('opacity',.08+s*.22);const x=ph/2;dot.setAttribute('cx',L+x*(R-L));dot.setAttribute('cy',B-10-s*(B-T-30));if(!reduce)requestAnimationFrame(frame)}
+  $('#cephP').addEventListener('input',setP);setP();if(reduce)frame(performance.now());else requestAnimationFrame(frame)})();
+
+/* ---------- supernova ---------- */
+$('#snBtn').addEventListener('click',()=>{const f=$('#snFlash');if(reduce){f.setAttribute('r',14);setTimeout(()=>f.setAttribute('r',4),1200);return}let t=0;const go=()=>{t+=1/60;const r=t<.3?4+t/.3*26:30*Math.exp(-(t-.3)*1.4)+4;f.setAttribute('r',r);f.setAttribute('fill',t<.5?'#fff':'#FFE3A0');if(t<3)requestAnimationFrame(go);else{f.setAttribute('r',4);f.setAttribute('fill','#fff')}};go()});
+
+/* ---------- dust ---------- */
+(function(){const svg=$('#dustSvg');let lifted=false;
+  const me=el('text',{x:30,y:108,'font-size':13,fill:'#97A3C2'},svg);me.textContent='ми 👀';
+  el('line',{x1:70,y1:104,x2:330,y2:104,stroke:'#2B395D','stroke-dasharray':'3 5'},svg);
+  const glow=el('circle',{cx:360,cy:100,r:40,fill:'#FFD36B',opacity:.3},svg),core=el('circle',{cx:360,cy:100,r:16,fill:'#FFF2C2'},svg);
+  const dust=el('g',{},svg);let s=11;const r=()=>(s=(s*16807)%2147483647)/2147483647;
+  el('rect',{x:170,y:10,width:90,height:180,rx:30,fill:'#6B4A2E'},dust);for(let i=0;i<120;i++)el('circle',{cx:170+r()*90,cy:12+r()*176,r:1+r()*3,fill:'#9C7347',opacity:.6},dust);
+  const dl=el('text',{x:215,y:200-4,'text-anchor':'middle','font-size':12,fill:'#E7ECF8'},svg);dl.textContent='пил';
+  function draw(){const A=+$('#dustR').value;$('#dustL').textContent=fmt(A,1)+' зор. вел.';const f=Math.pow(10,-.4*A);const seen=lifted?1:f;
+    dust.setAttribute('opacity',lifted?0:Math.min(.92,A/2.5*.92));dust.style.transition='opacity .4s';dl.setAttribute('opacity',lifted?0:1);
+    core.setAttribute('opacity',.15+.85*seen);glow.setAttribute('opacity',.05+.3*seen);
+    const fake=1000/Math.sqrt(f);$('#dustOut').innerHTML=lifted?`Шар піднято: чесна яскравість. Справжня відстань — <b>1 000 св. р.</b>`:`Видно лише <b>${Math.round(f*100)}%</b> світла → «здається» на <b>${Math.round(fake).toLocaleString('uk-UA')} св. р.</b> замість 1 000. Потрібна поправка!`}
+  $('#dustR').addEventListener('input',draw);$('#dustLift').addEventListener('click',()=>{lifted=!lifted;$('#dustLift').textContent=lifted?'↩ Повернути пил':'🧹 Підняти шар пилу';draw()});draw()})();
+
+/* ---------- ladder ---------- */
+const RUNGS=[[1,'Радар','Сонячна система'],[2,'Паралакс','тисячі св. р.'],[3,'Цефеїди','~100 млн св. р.'],[4,'Наднові Ia','мільярди св. р.'],[5,'Червоне зміщення','край видимого']];
+function ladderReset(){const L=$('#ladder');L.innerHTML='';for(let k=5;k>=1;k--){const r=document.createElement('div');r.className='rung';r.innerHTML=`<span class="n">${k}</span><div class="slot" data-drop data-max="1" data-slot="${k}"></div>`;L.append(r)}
+  const t=$('#ladderTray');t.innerHTML='';shuffle(RUNGS).forEach(([k,a,b])=>{const c=mkChip('',{k});c.innerHTML=`<span>🪜 ${a}</span><span class="muted" style="font-weight:400;font-size:12px">${b}</span>`;t.append(c)});$('#ladderV').textContent='';$('#ladderV').className='verdict'}
+dnd($('#ladderGame'),()=>{$('#ladderV').textContent=''});
+$('#ladderReset').addEventListener('click',ladderReset);
+$('#ladderCheck').addEventListener('click',()=>{let ok=0;$$('#ladder .slot').forEach(s=>{const c=s.querySelector('.chip');if(!c)return;const g=c.dataset.k===s.dataset.slot;c.classList.toggle('ok',g);c.classList.toggle('bad',!g);ok+=g});const v=$('#ladderV');v.textContent=ok===5?'Драбину зібрано! 🪜':`${ok} з 5 на місці`;v.className='verdict '+(ok===5?'ok':'bad')});
+ladderReset();
+
+/* ---------- balloon / Hubble ---------- */
+(function(){const svg=$('#balSvg'),bar=$('#barSvg');const U=12;
+  const A=[-48,12],P={A,B:[A[0]+19.2,A[1]+14.4],C:[A[0]+38.4,A[1]-28.8],D:[A[0]+69.12,A[1]-20.16]};
+  const COL={A:'#FFD36B',B:'#7FD6FF',C:'#FF8FD8',D:'#9EF0C0'};let obs='A',sc=+$('#balR').value,raf=0;
+  const g=el('g',{},svg);
+  function draw(){g.innerHTML='';$('#balL').textContent='×'+fmt(sc,2);
+    el('circle',{cx:0,cy:0,r:62*sc,fill:'#E35BD8',opacity:.14,stroke:'#E35BD8','stroke-width':2},g);
+    el('ellipse',{cx:-20*sc,cy:-26*sc,rx:14*sc,ry:7*sc,fill:'#fff',opacity:.12,transform:`rotate(-30 ${-20*sc} ${-26*sc})`},g);
+    el('path',{d:`M-6 ${62*sc} L6 ${62*sc} L0 ${62*sc+9}Z`,fill:'#E35BD8'},g);
+    const o=P[obs];
+    for(const k in P){if(k===obs)continue;const p=P[k];const x0=o[0]*sc,y0=o[1]*sc,x1=p[0]*sc,y1=p[1]*sc;const dx=x1-x0,dy=y1-y0,len=Math.hypot(dx,dy);
+      el('line',{x1:x0,y1:y0,x2:x1,y2:y1,stroke:'#fff',opacity:.18,'stroke-dasharray':'2 3'},g);
+      const ex=(p[0]-o[0])*(sc-1)*.6;const ey=(p[1]-o[1])*(sc-1)*.6;if(sc>1.02){el('line',{x1:x1,y1:y1,x2:x1+ex,y2:y1+ey,stroke:COL[k],'stroke-width':2.2,'marker-end':'url(#arr)'},g)}}
+    for(const k in P){const p=P[k];el('circle',{cx:p[0]*sc,cy:p[1]*sc,r:k===obs?7:5,fill:COL[k],stroke:k===obs?'#fff':'none','stroke-width':2},g);const t=el('text',{x:p[0]*sc+8,y:p[1]*sc-7,'font-size':13,'font-weight':700,fill:COL[k]},g);t.textContent=k}
+    drawBars()}
+  const defs=el('defs',{},svg);const m=el('marker',{id:'arr',viewBox:'0 0 10 10',refX:8,refY:5,markerWidth:5,markerHeight:5,orient:'auto-start-reverse'},defs);el('path',{d:'M0 0L10 5L0 10z',fill:'#E7ECF8'},m);
+  function drawBars(){bar.innerHTML='';$('#obsName').textContent=obs;const o=P[obs];const rows=Object.keys(P).filter(k=>k!==obs).map(k=>{const d0=Math.hypot(P[k][0]-o[0],P[k][1]-o[1])/U;return[k,d0,d0*sc]}).sort((a,b)=>a[1]-b[1]);
+    const max=Math.max(...rows.map(r=>r[2]),1);const L=40,W=165;
+    rows.forEach(([k,d0,d1],i)=>{const y=14+i*52;const t=el('text',{x:10,y:y+20,'font-size':14,'font-weight':700,fill:COL[k]},bar);t.textContent=k;
+      el('rect',{x:L,y:y,width:d0/max*W,height:14,rx:3,fill:'#3B4B75'},bar);el('rect',{x:L,y:y+18,width:d1/max*W,height:14,rx:3,fill:COL[k]},bar);
+      const a=el('text',{x:L+d0/max*W+6,y:y+11,'font-size':11,fill:'#97A3C2'},bar);a.textContent=fmt(d0,1);
+      const b=el('text',{x:L+d1/max*W+6,y:y+29,'font-size':11,fill:'#E7ECF8'},bar);b.textContent=fmt(d1,1)+'  (+'+fmt(d1-d0,1)+')'});
+    const lg=el('text',{x:L,y:166,'font-size':11,fill:'#97A3C2'},bar);lg.textContent='сірий — до, кольоровий — після'}
+  $('#balR').addEventListener('input',()=>{sc=+$('#balR').value;draw()});
+  $$('#obsSeg button').forEach(b=>b.addEventListener('click',()=>{$$('#obsSeg button').forEach(x=>x.setAttribute('aria-pressed','false'));b.setAttribute('aria-pressed','true');obs=b.textContent;draw()}));
+  $('#balPlay').addEventListener('click',()=>{cancelAnimationFrame(raf);if(reduce){sc=2;$('#balR').value=2;draw();return}sc=1;const go=()=>{sc=Math.min(2,sc+.012);$('#balR').value=sc;draw();if(sc<2)raf=requestAnimationFrame(go)};go()});
+  draw()})();
+
+/* ---------- cosmic web ---------- */
+(function(){const cv=$('#web'),c=cv.getContext('2d'),W=1000,H=560;let nodes=[],edges=[],gal=[],marks=[],kind='f',skel=false,lan=false,checked=false;
+  const COLS={f:'#FFD34D',n:'#FF5468',v:'#4FB2FF'},NAMES={f:'нитка',n:'вузол',v:'войд'};
+  const gauss=()=>{let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)};
+  function segDist(px,py,[a,b]){const ax=nodes[a].x,ay=nodes[a].y,bx=nodes[b].x,by=nodes[b].y,dx=bx-ax,dy=by-ay;let t=((px-ax)*dx+(py-ay)*dy)/(dx*dx+dy*dy);t=Math.max(0,Math.min(1,t));return Math.hypot(px-ax-t*dx,py-ay-t*dy)}
+  function classify(x,y){const dn=Math.min(...nodes.map(n=>Math.hypot(x-n.x,y-n.y)));if(dn<30)return'n';const ds=Math.min(...edges.map(e=>segDist(x,y,e)));if(ds<18)return'f';if(Math.min(dn,ds)>48)return'v';return null}
+  function gen(){nodes=[];let tries=0;while(nodes.length<15&&tries<3000){tries++;const n={x:60+Math.random()*(W-120),y:50+Math.random()*(H-100)};if(nodes.every(m=>Math.hypot(m.x-n.x,m.y-n.y)>150))nodes.push(n)}
+    const set=new Set();edges=[];nodes.forEach((n,i)=>{nodes.map((m,j)=>[j,Math.hypot(m.x-n.x,m.y-n.y)]).filter(([j])=>j!==i).sort((a,b)=>a[1]-b[1]).slice(0,3).forEach(([j,d])=>{if(d>320)return;const k=i<j?i+'-'+j:j+'-'+i;if(!set.has(k)){set.add(k);edges.push([Math.min(i,j),Math.max(i,j)])}})});
+    gal=[];nodes.forEach(n=>{const rich=30+Math.random()*70;for(let i=0;i<rich;i++)gal.push([n.x+gauss()*9,n.y+gauss()*9,1.6+Math.random()*1.6,1])});
+    edges.forEach(([a,b])=>{const A=nodes[a],B=nodes[b],len=Math.hypot(B.x-A.x,B.y-A.y),bend=gauss()*14,nx=-(B.y-A.y)/len,ny=(B.x-A.x)/len;for(let i=0;i<len/2.2;i++){const t=Math.random(),cur=Math.sin(Math.PI*t)*bend;gal.push([A.x+(B.x-A.x)*t+nx*(cur+gauss()*4.5),A.y+(B.y-A.y)*t+ny*(cur+gauss()*4.5),.9+Math.random()*1.2,.8])}});
+    for(let i=0;i<140;i++)gal.push([Math.random()*W,Math.random()*H,.6+Math.random()*.6,.35]);
+    marks=[];checked=false;$('#webOut').textContent='Обери тип мітки й натискай на карту.';draw()}
+  function draw(){c.clearRect(0,0,W,H);c.fillStyle='#070B18';c.fillRect(0,0,W,H);
+    gal.forEach(([x,y,r,a])=>{c.fillStyle=`rgba(${a>.9?'255,214,240':'214,170,255'},${a})`;c.beginPath();c.arc(x,y,r,0,7);c.fill()});
+    nodes.forEach(n=>{const g=c.createRadialGradient(n.x,n.y,0,n.x,n.y,26);g.addColorStop(0,'rgba(255,230,250,.55)');g.addColorStop(1,'rgba(227,91,216,0)');c.fillStyle=g;c.beginPath();c.arc(n.x,n.y,26,0,7);c.fill()});
+    if(skel){c.lineWidth=2;c.strokeStyle='rgba(255,211,77,.7)';edges.forEach(([a,b])=>{c.beginPath();c.moveTo(nodes[a].x,nodes[a].y);c.lineTo(nodes[b].x,nodes[b].y);c.stroke()});nodes.forEach(n=>{c.strokeStyle='rgba(255,84,104,.9)';c.beginPath();c.arc(n.x,n.y,30,0,7);c.stroke()});
+      c.font='600 15px Onest, sans-serif';c.fillStyle='rgba(79,178,255,.9)';let cnt=0;for(let y=40;y<H&&cnt<5;y+=40)for(let x=40;x<W&&cnt<5;x+=40){if(classify(x,y)==='v'){const dn=Math.min(...edges.map(e=>segDist(x,y,e)));if(dn>80){c.fillText('войд',x-16,y);cnt++;x+=200}}}}
+    if(lan){const n=nodes.reduce((b,n)=>Math.abs(n.x-W*.5)+Math.abs(n.y-H*.5)<Math.abs(b.x-W*.5)+Math.abs(b.y-H*.5)?n:b,nodes[0]);c.setLineDash([6,6]);c.strokeStyle='#33D695';c.lineWidth=2;c.beginPath();c.arc(n.x,n.y,95,0,7);c.stroke();c.setLineDash([]);c.fillStyle='#33D695';c.font='600 16px Onest, sans-serif';c.fillText('Ланіакея — лише одна клітинка',n.x-110,n.y-104);c.beginPath();c.arc(n.x+16,n.y+10,3,0,7);c.fill();c.font='12px Onest, sans-serif';c.fillText('ми тут',n.x+22,n.y+24)}
+    marks.forEach((m,i)=>{c.beginPath();c.arc(m.x,m.y,10,0,7);c.fillStyle=COLS[m.k];c.fill();c.lineWidth=2;c.strokeStyle='#070B18';c.stroke();
+      if(checked){const r=classify(m.x,m.y);c.font='700 14px Onest, sans-serif';c.fillStyle=r===m.k?'#33D695':r===null?'#97A3C2':'#FF6B7A';c.fillText(r===m.k?'✓':r===null?'?':'✗',m.x+12,m.y-8)}})}
+  cv.addEventListener('click',e=>{const b=cv.getBoundingClientRect();const x=(e.clientX-b.left)/b.width*W,y=(e.clientY-b.top)/b.height*H;marks.push({x,y,k:kind});checked=false;draw();$('#webOut').textContent=`Міток: ${marks.length} (нитки ${marks.filter(m=>m.k==='f').length}, вузли ${marks.filter(m=>m.k==='n').length}, войди ${marks.filter(m=>m.k==='v').length})`});
+  $$('#markers .mk').forEach(b=>b.addEventListener('click',()=>{$$('#markers .mk').forEach(x=>x.setAttribute('aria-pressed','false'));b.setAttribute('aria-pressed','true');kind=b.dataset.k}));
+  $('#webCheck').addEventListener('click',()=>{checked=true;draw();if(!marks.length){$('#webOut').textContent='Ще немає жодної мітки.';return}let ok=0,unk=0;const wrong={};marks.forEach(m=>{const r=classify(m.x,m.y);if(r===m.k)ok++;else if(r===null)unk++;else wrong[m.k]=(wrong[m.k]||0)+1});
+    $('#webOut').innerHTML=`Влучно: <b>${ok} з ${marks.length}</b>`+(unk?` · на межі (не рахуємо): ${unk}`:'')+(Object.keys(wrong).length?' · помилки: '+Object.entries(wrong).map(([k,v])=>NAMES[k]+' ×'+v).join(', '):'')});
+  $('#webSkel').addEventListener('click',()=>{skel=!skel;$('#webSkel').textContent=skel?'Сховати каркас':'Показати каркас';draw()});
+  $('#webLan').addEventListener('click',()=>{lan=!lan;draw()});
+  $('#webUndo').addEventListener('click',()=>{marks.pop();draw()});
+  $('#webNew').addEventListener('click',()=>{skel=false;lan=false;$('#webSkel').textContent='Показати каркас';gen()});
+  gen()})();
+
+/* ---------- passport ---------- */
+const LEVELS=[['Земля → Місяць','384 400 км','км','лазерна локація'],['Сонячна система','1 а. о. ≈ 150 млн км','а. о.','радар + закони Кеплера'],['Сусідні зорі','Проксима ≈ 1,3 пк','пк','паралакс'],['Чумацький Шлях','до центру ≈ 26 тис. св. р.','кпк',['паралакси Gaia + змінні зорі','цефеїди']],['Місцева група','Андромеда ≈ 2,5 млн св. р.','Мпк','цефеїди'],['Ланіакея','≈ 520 млн св. р.','Мпк',['наднові Ia','червоне зміщення']],['Космічна павутина','радіус видимого ≈ 46 млрд св. р.','млрд св. р.','червоне зміщення']];
+const DISTS=LEVELS.map(l=>l[1]),UNITS=['км','а. о.','пк','кпк','Мпк','млрд св. р.'],METHODS=['лазерна локація','радар + закони Кеплера','паралакс','паралакси Gaia + змінні зорі','цефеїди','наднові Ia','червоне зміщення'];
+const sel=(arr,lab)=>`<select data-l="${lab}" aria-label="${lab}"><option value="">${lab}…</option>${arr.map(a=>`<option>${a}</option>`).join('')}</select>`;
+function passBuild(){const p=$('#pass');p.innerHTML='';const sd=shuffle(DISTS),sm=shuffle(METHODS);LEVELS.forEach((l,i)=>{const r=document.createElement('div');r.className='prow';r.innerHTML=`<div class="lv"><i style="--k:${i}"></i>${l[0]}</div>${sel(sd,'відстань')}${sel(UNITS,'одиниця')}${sel(sm,'метод')}`;p.append(r)});
+  const who=$('#passWho').value;const saved=(S.pass||{})[who];if(saved)$$('#pass select').forEach((s,i)=>{s.value=saved[i]||''});$('#passV').textContent=''}
+function passSave(){S.pass=S.pass||{};S.pass[$('#passWho').value]=$$('#pass select').map(s=>s.value);save()}
+$('#pass').addEventListener('change',e=>{e.target.classList.remove('ok','bad');passSave()});
+$('#passCheck').addEventListener('click',()=>{let ok=0;$$('#pass .prow').forEach((r,i)=>{const [d,u,m]=$$('select',r),L=LEVELS[i];const meth=Array.isArray(L[3])?L[3]:[L[3]];[[d,d.value===L[1]],[u,u.value===L[2]],[m,meth.includes(m.value)]].forEach(([s,g])=>{s.classList.toggle('ok',g);s.classList.toggle('bad',!g);ok+=g})});const v=$('#passV');v.textContent=`${ok} з 21`+(ok===21?' — повна космічна адреса! 🌌':ok>=15?' — чудова логіка!':'');v.className='verdict '+(ok>=15?'ok':'bad')});
+$('#passReset').addEventListener('click',()=>{$$('#pass select').forEach(s=>{s.value='';s.classList.remove('ok','bad')});passSave();$('#passV').textContent=''});
+$('#passWho').addEventListener('change',passBuild);
+
+/* ---------- blitz ---------- */
+const BLITZ=[['1 пк = ? св. р.','≈ 3,26 св. р.'],['p = 0,1″ → d = ?','10 пк'],['Хто першим виміряв паралакс зорі у 1838?','Бессель (61 Лебедя)'],['Що таке войд?','Величезна майже порожня область між нитками'],['Цефеїда — це…?','Пульсуюча зоря, стандартна свічка'],['Де центр Всесвіту?','Ніде / всюди']];
+const BANK=[['Що більше: 1 а. о. чи 1 св. р.?','Св. р., ≈ у 63 тис. разів'],['Що таке база в методі паралаксу?','Відстань між точками спостереження: 2 а. о.'],['Свічка в 4 рази тьмяніша — у скільки разів далі?','У 2 рази'],['Хто довів, що Андромеда — окрема галактика?','Габбл (1923–25)'],['Найближча до Сонця зоря?','Проксима Центавра'],['Як називається наше надскупчення?','Ланіакея'],['Червоне зміщення — ознака того, що галактика…','віддаляється'],['Супутник ESA для паралаксів?','Gaia']];
+function blitz(list){const b=$('#blitz');b.innerHTML='';list.forEach(([q,a],i)=>{const f=document.createElement('button');f.className='flip';f.innerHTML=`<div class="in"><div class="f"><span class="k">${String(i+1).padStart(2,'0')}</span><span class="tx">${q}</span></div><div class="b"><span class="k">ВІДПОВІДЬ</span><span class="tx">${a}</span></div></div>`;f.addEventListener('click',()=>f.classList.toggle('open'));b.append(f)})}
+blitz(BLITZ);let bankOn=false;$('#blitzMore').addEventListener('click',()=>{bankOn=!bankOn;blitz(bankOn?shuffle(BANK).slice(0,6):BLITZ);$('#blitzMore').textContent=bankOn?'↩ Основні 6':'🎲 Ще питання'});
+
+/* ---------- kahoot ---------- */
+function kahoot(){const v=($('#kahootIn').value||'').trim();S.kahoot=v;save();$('#kahootBig').textContent=/^\d{4,10}$/.test(v)?v.replace(/(\d{3})(?=\d)/g,'$1 '):'';const q=$('#qr');q.innerHTML='';q.style.padding='0';if(!v)return;const url=/^\d+$/.test(v)?'https://kahoot.it/?pin='+v:v;if(window.QRCode){try{new QRCode(q,{text:url,width:150,height:150,colorDark:'#0F172A',colorLight:'#ffffff'});q.style.padding='8px'}catch(e){}}}
+$('#kahootIn').value=S.kahoot||'';$('#kahootIn').addEventListener('input',kahoot);kahoot();
+
+/* ---------- key questions ---------- */
+const KEYQ=['Одиниця чи метод?','Як паралакс міряє зорі?','Що таке стандартна свічка?','Яка форма у Всесвіту?'];S.k4=S.k4||{};
+function renderK4(){const w=$('#check4');w.innerHTML='';KEYQ.forEach((q,i)=>{const it=document.createElement('div');it.className='it';it.innerHTML=`<span class="mono" style="color:var(--z4)">0${i+1}</span><span>${q}</span><span class="seg"><button data-v="+">+</button><button class="q" data-v="?">?</button></span>`;$$('button',it).forEach(b=>{b.setAttribute('aria-pressed',S.k4[i]===b.dataset.v);b.addEventListener('click',()=>{S.k4[i]=S.k4[i]===b.dataset.v?null:b.dataset.v;save();renderK4()})});w.append(it)});
+  const plus=Object.values(S.k4).filter(v=>v==='+').length;$('#check4Out').innerHTML=`Впевнено: <b>${plus} з 4</b>`+(Object.values(S.k4).includes('?')?' · питання з «?» — на гурток!':'')}
+renderK4();
+
+/* ---------- rating ---------- */
+function renderRate(){const r=$('#rate');r.innerHTML='';for(let i=1;i<=5;i++){const b=document.createElement('button');b.textContent='★';b.setAttribute('aria-label',i+' з 5');b.className=i<=(S.rate||0)?'on':'';b.addEventListener('click',()=>{S.rate=S.rate===i?0:i;save();renderRate()});r.append(b)}}
+renderRate();
+
+/* ---------- crew selects ---------- */
+function fillWho(){['#passWho','#noteWho'].forEach(id=>{const s=$(id),v=s.value;s.innerHTML=(id==='#noteWho'?'<option value="">анонімно</option>':'<option value="me">мій паспорт</option>')+S.names.map((n,i)=>`<option value="${i}">★ ${n}</option>`).join('');s.value=v||s.options[0].value})}
+
+/* ---------- notes wall ---------- */
+function renderWall(){const w=$('#wall');w.innerHTML='';if(!S.notes.length){w.innerHTML='<span class="muted" style="font-size:14px">Тут з\'являться наліпки з думками екіпажу.</span>';return}
+  S.notes.forEach((n,i)=>{const d=document.createElement('div');d.className='sticky';d.textContent=n.t;const who=document.createElement('span');who.className='who';who.textContent=n.w!==''&&n.w!=null?'★ '+nm(+n.w):'';const x=document.createElement('button');x.className='x';x.textContent='✕';x.setAttribute('aria-label','Прибрати');x.addEventListener('click',()=>{S.notes.splice(i,1);save();renderWall()});d.append(who,x);w.append(d)})}
+function addNote(){const t=$('#noteIn').value.trim();if(!t)return;S.notes.push({t,w:$('#noteWho').value});$('#noteIn').value='';save();renderWall()}
+$('#noteAdd').addEventListener('click',addNote);$('#noteIn').addEventListener('keydown',e=>{if(e.key==='Enter')addNote()});renderWall();
+
+/* ---------- crew drawer ---------- */
+const dw=$('#drawer'),scrim=$('#scrim');const openD=o=>{dw.classList.toggle('open',o);scrim.classList.toggle('on',o)};
+$('#crewBtn').addEventListener('click',()=>openD(true));$('#crewClose').addEventListener('click',()=>openD(false));scrim.addEventListener('click',()=>openD(false));
+addEventListener('keydown',e=>{if(e.key==='Escape')openD(false)});
+function renderCrew(){const c=$('#crew');c.innerHTML='';S.names.forEach((n,i)=>{const r=document.createElement('div');r.className='mate';r.style.setProperty('--h',HUES[i]);r.innerHTML=`<span class="s">★</span><input type="text" id="nm${i}" aria-label="Ім'я ${i+1}"><span class="pts"><button aria-label="мінус бал">−</button><b>${S.pts[i]}</b><button aria-label="плюс бал">+</button></span>`;const inp=$('input',r);inp.value=n;
+  inp.addEventListener('change',()=>{S.names[i]=inp.value.trim()||STARS[i];save();renderMood();fillWho();renderWall()});
+  const [m,p]=$$('.pts button',r);m.addEventListener('click',()=>{S.pts[i]=Math.max(0,S.pts[i]-1);save();$('b',r).textContent=S.pts[i]});p.addEventListener('click',()=>{S.pts[i]++;save();$('b',r).textContent=S.pts[i]});c.append(r)})}
+let pool=[];function pick(){if(!pool.length)pool=shuffle([...Array(11).keys()]);const el2=$('#pick');let n=0;const fin=pool.pop();const spin=()=>{const i=n<12?(Math.random()*11|0):fin;el2.textContent='★ '+nm(i);el2.style.setProperty('--h',HUES[i]);if(n++<12&&!reduce)setTimeout(spin,50+n*12)};spin();$('#pickLeft').textContent=`ще не відповідали: ${pool.length}`}
+$('#pickBtn').addEventListener('click',pick);
+$('#pairBtn').addEventListener('click',()=>{const o=shuffle([...Array(11).keys()]);const gs=[o.slice(0,2),o.slice(2,4),o.slice(4,6),o.slice(6,8),o.slice(8,11)];$('#groups').innerHTML=gs.map((g,i)=>`<div><b>Кулька ${i+1}:</b> ${g.map(nm).join(' · ')}</div>`).join('')});
+$('#ptsReset').addEventListener('click',()=>{S.pts=Array(11).fill(0);save();renderCrew()});
+let armed=false;$('#allReset').addEventListener('click',e=>{const b=e.currentTarget;if(!armed){armed=true;b.textContent='Точно? Натисни ще раз';setTimeout(()=>{armed=false;b.textContent='Скинути всю дошку'},3000);return}S={names:S.names,pts:Array(11).fill(0),mood:{},notes:[]};save();location.reload()});
+
+renderCrew();fillWho();passBuild();
+})();
+</script>
+
+</body></html>
