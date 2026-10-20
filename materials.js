@@ -26,3 +26,15 @@ window.MATERIALS = [
     date: "2026-10-17"
   },
 ];
+
+window.MATERIALS = [
+  // поки що порожньо — полиці чекають на перші книжки
+     {
+    title: "Рух і взаємодія частинок речовини",
+    subject: "Фізика",
+    type: "Конспект",
+    grade: "7 клас",
+    url: "ruh-chastynok-rechovyny.html",
+    date: "2026-10-17"
+  },
+];
